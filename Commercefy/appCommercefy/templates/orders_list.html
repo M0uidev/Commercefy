@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load roles %}
+
+{% block content %}
+<div class="container mt-4">
+    <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="#">Listado de Pedidos</a>
+        </li>
+        {% if user|has_group:'trabajador' %}
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'fulfillment_game' %}">Preparación</a>
+        </li>
+        {% endif %}
+    </ul>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h2 class="card-title mb-4">Pedidos Online</h2>
+
+            <!-- Formulario de búsqueda -->
+            <form method="get" class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <input type="text" name="q" class="form-control" placeholder="Buscar por cliente, producto, código pedido o código de barras (P#-S#)" value="{{ search_query }}">
+                </div>
+                <div class="col-md-3">
+                    <input type="date" name="date" class="form-control" value="{{ date_filter }}">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+                </div>
+                <div class="col-md-2">
+                    <a href="{% url 'order_list' %}" class="btn btn-outline-secondary w-100">Limpiar</a>
+                </div>
+            </form>
+
+            <div id="orders-wrapper">
+                {% include 'partials/orders_rows.html' %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Detalle Pedido -->
+<div class="modal fade" id="orderDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="order-detail-content">
+            <!-- Contenido cargado vía AJAX -->
+            <div class="modal-body text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function loadOrderDetail(orderId) {
+        const modalContent = document.getElementById('order-detail-content');
+        modalContent.innerHTML = `
+            <div class="modal-body text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+            </div>`;
+            
+        const modal = new bootstrap.Modal(document.getElementById('orderDetailModal'));
+        modal.show();
+
+        fetch(`/orders/${orderId}/detail/`)
+            .then(response => response.text())
+            .then(html => {
+                modalContent.innerHTML = html;
+            })
+            .catch(err => {
+                console.error('Error al cargar detalles del pedido:', err);
+                modalContent.innerHTML = '<div class="modal-body text-danger">Error al cargar los detalles.</div>';
+            });
+    }
+
+    window.addEventListener('newOrderDetected', function() {
+        // Obtiene filas actualizadas de la tabla vía AJAX
+        fetch(window.location.href, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('orders-wrapper').innerHTML = html;
+        })
+        .catch(err => console.error('Error al actualizar tabla de pedidos:', err));
+    });
+
+    // Maneja paginación AJAX
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.ajax-link')) {
+            e.preventDefault();
+            const url = e.target.closest('.ajax-link').href;
+            
+            fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('orders-wrapper').innerHTML = html;
+                // Actualiza URL sin recargar
+                history.pushState(null, '', url);
+            })
+            .catch(err => console.error('Error al cargar página:', err));
+        }
+    });
+</script>
+{% endblock %}

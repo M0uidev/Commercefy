@@ -1,0 +1,299 @@
+{% extends "basecliente.html" %}
+{% load static %}
+
+{% block title %}Productos · Multitienda{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/dashboardtrabajador.css' %}">
+  <link rel="stylesheet" href="{% static 'css/pages/pagina1.css' %}">
+{% endblock %}
+
+{% block content %}
+  <!-- Sección hero con gradiente -->
+  <section class="container-fluid px-0 mb-5">
+    <div class="rounded-3 p-5 text-center" style="background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-primary) 100%);">
+      <h1 class="display-4 fw-bold mb-3" style="color: var(--text-white);">Nuevas Colecciones</h1>
+      <p class="lead text-muted mb-4">Descubre lo último en tendencias!</p>
+      <a href="#ofertas" class="btn btn-pastel btn-lg px-5" style="background: white; color: var(--color-primary-dark);">Ver Ofertas</a>
+    </div>
+  </section>
+
+  <!-- Carrusel de ofertas imperdibles -->
+  {% if ofertas_imperdibles|length >= 5 %}
+  <section class="container mb-5 position-relative" id="ofertas">
+    <h2 class="h3 fw-bold mb-4">Ofertas Imperdibles</h2>
+    
+    <div class="position-relative px-4">
+      <button class="btn btn-light rounded-circle shadow position-absolute top-50 start-0 translate-middle-y z-2 d-none d-md-flex align-items-center justify-content-center" id="prevOffer" style="width: 40px; height: 40px; left: 0;">
+        <i class="bi bi-chevron-left"></i>
+      </button>
+      
+      <div class="scrolling-wrapper-flexbox py-2 d-flex flex-nowrap" id="offersCarousel">
+        {% for producto in ofertas_imperdibles|slice:":12" %}
+          <div class="card-product-carousel">
+            {% include 'partials/product_card.html' with product=producto %}
+          </div>
+        {% endfor %}
+      </div>
+
+      <button class="btn btn-light rounded-circle shadow position-absolute top-50 end-0 translate-middle-y z-2 d-none d-md-flex align-items-center justify-content-center" id="nextOffer" style="width: 40px; height: 40px; right: 0;">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Productos filtrables por categoría -->
+  <section class="container mb-5" id="imperdibles">
+    <div class="d-flex flex-column align-items-center mb-4">
+      <h2 class="h3 fw-bold mb-3">Productos para ti</h2>
+      <div class="d-flex flex-wrap justify-content-center gap-2" id="filterChips">
+        <a href="?category=all{% if current_sort %}&sort={{ current_sort }}{% endif %}{% if items_per_page %}&items={{ items_per_page }}{% endif %}" class="btn btn-sm {% if not current_category or current_category == 'all' %}btn-primary active{% else %}btn-outline-primary{% endif %} rounded-pill filter-chip ajax-link" data-category="all">Todos</a>
+        {% for cat in categories %}
+          <a href="?category={{ cat.slug }}{% if current_sort %}&sort={{ current_sort }}{% endif %}{% if items_per_page %}&items={{ items_per_page }}{% endif %}" class="btn btn-sm {% if current_category == cat.slug %}btn-primary active{% else %}btn-outline-primary{% endif %} rounded-pill filter-chip ajax-link" data-category="{{ cat.slug }}">{{ cat.name }}</a>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div id="product-list-container">
+      {% include 'partials/product_list.html' %}
+    </div>
+
+    <!-- Selector de items por página -->
+    <div class="text-center mt-3">
+        <form method="get" class="d-inline-block" id="itemsPerPageForm">
+            <input type="hidden" name="category" value="{{ current_category|default:'' }}">
+            <input type="hidden" name="sort" value="{{ current_sort|default:'' }}">
+            <label for="items" class="form-label me-2">Productos por página:</label>
+            <select name="items" id="items" class="form-select d-inline-block w-auto">
+                <option value="8" {% if items_per_page|stringformat:"s" == "8" %}selected{% endif %}>8</option>
+                <option value="16" {% if items_per_page|stringformat:"s" == "16" %}selected{% endif %}>16</option>
+                <option value="24" {% if items_per_page|stringformat:"s" == "24" %}selected{% endif %}>24</option>
+                <option value="32" {% if items_per_page|stringformat:"s" == "32" %}selected{% endif %}>32</option>
+            </select>
+        </form>
+    </div>
+  </section>
+
+  <!-- Tarjetas de información: Ayuda, Pedidos, Devoluciones, Tiendas -->
+  <section class="container mb-5">
+    <div class="row g-4">
+      <!-- Item 1: Ayuda -->
+      <div class="col-12 col-sm-6 col-lg-3">
+        <a href="#" class="d-flex align-items-center text-decoration-none text-dark h-100 p-3 border rounded shadow-sm bg-white info-card-hover">
+          <div class="flex-shrink-0 me-3" style="color: var(--color-primary-dark);">
+            <svg class="icon icon--chat_bubble" width="44" height="44" viewBox="0 0 16 16" aria-hidden="true" focusable="false" role="presentation"><path fill="currentColor" d="M11.3 13.02a6 6 0 111.72-1.72L14 14l-2.7-.98zm2.82-1.62a7 7 0 10-2.72 2.72l2.26.82a1 1 0 001.28-1.28l-.82-2.26z"></path>
+            <path fill="currentColor" d="M4.9 9.16c.52 0 .86-.36.86-.85 0-.5-.34-.85-.87-.85-.52 0-.86.36-.86.85 0 .5.34.85.86.85zM7.88 9.16c.53 0 .87-.36.87-.85 0-.5-.34-.85-.87-.85-.52 0-.87.36-.87.85 0 .5.35.85.87.85zM10.87 9.16c.52 0 .87-.36.87-.85 0-.5-.35-.85-.87-.85s-.87.36-.87.85c0 .5.35.85.87.85z"></path></svg>
+          </div>
+          <div>
+            <h6 class="mb-0 fw-bold">¿Necesitas ayuda?</h6>
+            <small class="text-muted">Contacta a un agente</small>
+          </div>
+        </a>
+      </div>
+      <!-- Item 2: Compras -->
+      <div class="col-12 col-sm-6 col-lg-3">
+        <a href="{% url 'profile' %}" class="d-flex align-items-center text-decoration-none text-dark h-100 p-3 border rounded shadow-sm bg-white info-card-hover">
+          <div class="flex-shrink-0 me-3" style="color: var(--color-primary-dark);">
+            <svg class="icon icon--box" width="44" height="44" viewBox="0 0 16 16" aria-hidden="true" focusable="false" role="presentation"><path fill="currentColor" d="M14.41 3.37L8.27 1.41a1 1 0 00-.61 0L1.52 3.37a1 1 0 00-.7.95v7.86c0 .41.25.78.63.93l6.14 2.46c.24.1.5.1.75 0l6.14-2.46a1 1 0 00.62-.93V4.32a1 1 0 00-.69-.95zM7.96 2.36l6.05 1.93-2.7.9L5.35 3.2l2.63-.84zm-.46 12.1l-5.68-2.28V5.3L7.5 7.2v7.26zM8 6.3L1.96 4.28l2.58-.82 5.99 2L8 6.3zm6.1 5.89l-5.6 2.24V7.19l5.6-1.87v6.87z"></path></svg>
+          </div>
+          <div>
+            <h6 class="mb-0 fw-bold">Revisa tus compras</h6>
+            <small class="text-muted">Historial de pedido y despacho</small>
+          </div>
+        </a>
+      </div>
+      <!-- Item 3: Devoluciones -->
+      <div class="col-12 col-sm-6 col-lg-3">
+        <a href="#" class="d-flex align-items-center text-decoration-none text-dark h-100 p-3 border rounded shadow-sm bg-white info-card-hover">
+          <div class="flex-shrink-0 me-3" style="color: var(--color-primary-dark);">
+            <svg class="icon icon--return" width="44" height="44" viewBox="0 0 16 16" aria-hidden="true" focusable="false" role="presentation"><path fill="currentColor" d="M9 .5a.5.5 0 000 1h1a4.5 4.5 0 110 9H2.2l3.15-3.15a.5.5 0 10-.7-.7l-4 4a.5.5 0 000 .7l4 4a.5.5 0 00.7-.7L2.21 11.5H10a5.5 5.5 0 100-11H9z"></path></svg>
+          </div>
+          <div>
+            <h6 class="mb-0 fw-bold">Cambios y devoluciones</h6>
+            <small class="text-muted">Todo lo que necesitas saber</small>
+          </div>
+        </a>
+      </div>
+      <!-- Item 4: Tiendas -->
+      <div class="col-12 col-sm-6 col-lg-3">
+        <a href="#" class="d-flex align-items-center text-decoration-none text-dark h-100 p-3 border rounded shadow-sm bg-white info-card-hover">
+          <div class="flex-shrink-0 me-3" style="color: var(--color-primary-dark);">
+            <svg class="icon icon--map_pin" width="44" height="44" viewBox="0 0 16 16" aria-hidden="true" focusable="false" role="presentation"><path fill="currentColor" d="M6.72 14.63L7.5 14l.78.63-.78.96-.78-.96zm1.41-1.44L7.5 14s-.25-.3-.63-.81C5.63 11.54 3 7.8 3 5.79 3 3.14 5.01 1 7.5 1S12 3.14 12 5.79c0 2.02-2.63 5.75-3.87 7.4zm.15 1.44L7.5 14l-.78.63-.01-.02-.04-.05a26.53 26.53 0 01-.67-.87c-.43-.58-1.01-1.37-1.59-2.26A24.32 24.32 0 012.8 8.62 7.07 7.07 0 012 5.79C2 2.65 4.4 0 7.5 0S13 2.65 13 5.79c0 .9-.36 1.9-.8 2.83-.45.95-1.04 1.93-1.61 2.81a43.67 43.67 0 01-2.26 3.13l-.04.05v.01h-.01z" fill-rule="evenodd"></path>
+            <path fill="currentColor" d="M7.5 7a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm0 1a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" fill-rule="evenodd"></path></svg>
+          </div>
+          <div>
+            <h6 class="mb-0 fw-bold">Visita nuestra tienda</h6>
+            <small class="text-muted">Encuentra tu tienda más cercana</small>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Lógica del carrusel de ofertas
+      const scrollContainer = document.getElementById('offersCarousel');
+      const prevBtn = document.getElementById('prevOffer');
+      const nextBtn = document.getElementById('nextOffer');
+
+      if(scrollContainer && prevBtn && nextBtn) {
+        nextBtn.addEventListener('click', () => {
+          const card = scrollContainer.querySelector('.card-product-carousel');
+          if (card) {
+            const gap = 16;
+            const scrollAmount = card.offsetWidth + gap;
+            
+            // Vuelve al inicio si se llega al final
+            if (scrollContainer.scrollLeft + scrollContainer.clientWidth >= scrollContainer.scrollWidth - 10) {
+              scrollContainer.scrollTo({ left: 0, behavior: 'smooth' });
+            } else {
+              scrollContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            }
+          }
+        });
+        
+        prevBtn.addEventListener('click', () => {
+          const card = scrollContainer.querySelector('.card-product-carousel');
+          if (card) {
+            const gap = 16;
+            const scrollAmount = card.offsetWidth + gap;
+            
+            // Vuelve al final si se llega al inicio
+            if (scrollContainer.scrollLeft <= 10) {
+              scrollContainer.scrollTo({ left: scrollContainer.scrollWidth, behavior: 'smooth' });
+            } else {
+              scrollContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+            }
+          }
+        });
+      }
+
+      // Filtrado AJAX y paginación
+      const productContainer = document.getElementById('product-list-container');
+      const filterChips = document.querySelectorAll('.filter-chip');
+      const itemsSelect = document.getElementById('items');
+      const itemsForm = document.getElementById('itemsPerPageForm');
+
+      // Resuelve conflictos de z-index en modales en dispositivos móviles
+      function moveModalsToBody(container) {
+        if (!container) return;
+        const modals = container.querySelectorAll('.modal');
+        modals.forEach(modal => {
+          document.body.appendChild(modal);
+          if (container.id === 'product-list-container') {
+            modal.classList.add('list-modal');
+          }
+        });
+      }
+
+      // Mueve modales del contenido estático
+      moveModalsToBody(document.getElementById('offersCarousel'));
+      moveModalsToBody(productContainer);
+
+      function updateFormInputs(url) {
+          const urlObj = new URL(url, window.location.origin);
+          const params = urlObj.searchParams;
+          
+          if (itemsForm) {
+              const catInput = itemsForm.querySelector('input[name="category"]');
+              if (catInput) catInput.value = params.get('category') || '';
+              
+              const sortInput = itemsForm.querySelector('input[name="sort"]');
+              if (sortInput) sortInput.value = params.get('sort') || '';
+              
+              const itemsSelect = document.getElementById('items');
+              if (itemsSelect) {
+                  const itemsVal = params.get('items');
+                  if (itemsVal) itemsSelect.value = itemsVal;
+              }
+          }
+      }
+
+      function fetchProducts(url) {
+        productContainer.style.opacity = '0.5';
+        
+        fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            // Elimina modales antiguos
+            document.querySelectorAll('.modal.list-modal').forEach(el => el.remove());
+
+            productContainer.innerHTML = html;
+            productContainer.style.opacity = '1';
+            
+            // Mueve modales nuevos
+            moveModalsToBody(productContainer);
+
+            history.pushState(null, '', url);
+            updateFormInputs(url);
+            attachPaginationListeners();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            productContainer.style.opacity = '1';
+        });
+      }
+
+      function attachPaginationListeners() {
+        const paginationLinks = document.querySelectorAll('.pagination .ajax-link');
+        paginationLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                fetchProducts(this.href);
+                document.getElementById('imperdibles').scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+      }
+
+      filterChips.forEach(chip => {
+        chip.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            filterChips.forEach(c => {
+                c.classList.remove('active', 'btn-primary');
+                c.classList.add('btn-outline-primary');
+            });
+            this.classList.add('active', 'btn-primary');
+            this.classList.remove('btn-outline-primary');
+
+            // Construye URL preservando el estado actual
+            const category = this.getAttribute('data-category');
+            const items = document.getElementById('items').value;
+            const sortInput = document.querySelector('input[name="sort"]');
+            const sort = sortInput ? sortInput.value : '';
+
+            const params = new URLSearchParams();
+            if (category && category !== 'all') params.set('category', category);
+            else params.set('category', 'all');
+            
+            if (items) params.set('items', items);
+            if (sort) params.set('sort', sort);
+
+            const url = '?' + params.toString();
+            fetchProducts(url);
+        });
+      });
+
+      if (itemsSelect) {
+          itemsSelect.addEventListener('change', function() {
+              const formData = new FormData(itemsForm);
+              const params = new URLSearchParams(formData);
+              const url = '?' + params.toString();
+              fetchProducts(url);
+          });
+      }
+
+      attachPaginationListeners();
+
+      window.addEventListener('popstate', function() {
+           location.reload();
+      });
+    });
+  </script>
+{% endblock %}

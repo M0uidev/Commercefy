@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% load roles %}
+{% load cart_tags %}
+{% block nav_right %}
+  {% include 'partials/navbar_right.html' %}
+{% endblock %}
+
+{% block nav_left %}
+  <div class="nav-left">
+    <form action="{% url 'buscar_productos' %}" method="get" class="search-bar">
+      <i class="bi bi-search"></i>
+      <input type="text" name="q" placeholder="Buscar productos..." value="{{ request.GET.q|default:'' }}" />
+    </form>
+    <div class="location-text">
+      <i class="bi bi-geo-alt"></i> Entrega en todo el país
+    </div>
+  </div>
+{% endblock %}
