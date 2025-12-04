@@ -1,4 +1,4 @@
-  <article class="card-pastel h-100 d-flex flex-column product-card-hover">
+  <article class="card-pastel h-100 d-flex flex-column product-card-hover" style="background-color: var(--bg-product-card, var(--bg-surface));">
     <div class="position-relative overflow-hidden rounded-top-4">
       <a href="{% url 'producto_detalle' product.id %}" class="d-block">
         <img src="{{ product.image_url }}" class="card-img-top object-fit-cover" alt="{{ product.name }}" style="aspect-ratio: 1/1; width: 100%;">

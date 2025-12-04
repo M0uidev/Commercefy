@@ -1,0 +1,23 @@
+{% if products|length >= 5 %}
+<section class="container mb-5 position-relative" id="ofertas">
+  <h2 class="h3 fw-bold mb-4">{{ title|default:"Ofertas Imperdibles" }}</h2>
+  
+  <div class="position-relative px-4">
+    <button class="btn btn-light rounded-circle shadow position-absolute top-50 start-0 translate-middle-y z-2 d-none d-md-flex align-items-center justify-content-center" id="prevOffer" style="width: 40px; height: 40px; left: 0;">
+      <i class="bi bi-chevron-left"></i>
+    </button>
+    
+    <div class="scrolling-wrapper-flexbox py-2 d-flex flex-nowrap" id="offersCarousel">
+      {% for producto in products|slice:":12" %}
+        <div class="card-product-carousel">
+          {% include 'partials/product_card.html' with product=producto %}
+        </div>
+      {% endfor %}
+    </div>
+
+    <button class="btn btn-light rounded-circle shadow position-absolute top-50 end-0 translate-middle-y z-2 d-none d-md-flex align-items-center justify-content-center" id="nextOffer" style="width: 40px; height: 40px; right: 0;">
+      <i class="bi bi-chevron-right"></i>
+    </button>
+  </div>
+</section>
+{% endif %}

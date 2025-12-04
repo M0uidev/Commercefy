@@ -49,10 +49,61 @@ from .models import (
     MarketingTemplate,
     MarketingCampaign,
     CampaignLog,
-    SiteConfiguration
+    SiteConfiguration,
+    PageBlock
 )
 from .forms import CouponForm, BulkDiscountForm, CouponGenerationForm # Added Forms
 from django.contrib import messages # Added messages
+
+@require_POST
+@login_required
+def reorder_page_blocks(request):
+    """Reordena los bloques de página vía AJAX"""
+    if not request.user.is_staff:
+        return HttpResponseForbidden("No tienes permisos para editar bloques.")
+    
+    try:
+        data = json.loads(request.body)
+        new_order = data.get('order', [])
+        
+        with transaction.atomic():
+            for index, block_id in enumerate(new_order):
+                PageBlock.objects.filter(id=block_id).update(order=index + 1)
+                
+        return JsonResponse({'status': 'success', 'message': 'Orden actualizado correctamente'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+@require_POST
+@login_required
+def update_page_block(request):
+    """Actualiza un bloque de página vía AJAX"""
+    if not request.user.is_staff:
+        return HttpResponseForbidden("No tienes permisos para editar bloques.")
+    
+    try:
+        data = json.loads(request.body)
+        block_id = data.get('block_id')
+        title = data.get('title')
+        content = data.get('content', {})
+        
+        block = get_object_or_404(PageBlock, id=block_id)
+        
+        if title is not None:
+            block.title = title
+            
+        # Actualizar contenido preservando datos existentes si es necesario
+        # O reemplazar completamente según la lógica deseada. Aquí actualizamos.
+        current_content = block.content or {}
+        current_content.update(content)
+        block.content = current_content
+        
+        block.save()
+        
+        return JsonResponse({'status': 'success', 'message': 'Bloque actualizado correctamente'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
 from .services import get_regional_stats, RewardService, StockService, CartService, ProductService, CouponService
 from .services.emails import EmailService
 from django.contrib.auth.tokens import default_token_generator
@@ -73,6 +124,25 @@ def index(request):
 
 def pagina1(request):
     """Página principal con listado de productos, filtros y paginación"""
+    # Inicializar bloques por defecto si no existen
+    if not PageBlock.objects.filter(page_name="pagina1").exists():
+        default_blocks = [
+            PageBlock(page_name="pagina1", block_type="hero", order=1, title="Nuevas Colecciones", content={
+                "subtitle": "Descubre lo último en tendencias!",
+                "button_text": "Ver Ofertas",
+                "button_link": "#ofertas"
+            }),
+            PageBlock(page_name="pagina1", block_type="offers_carousel", order=2, title="Ofertas Imperdibles"),
+            PageBlock(page_name="pagina1", block_type="product_list", order=3, title="Productos", content={
+                "show_category_filter": True,
+                "show_items_per_page_selector": True,
+                "default_items_per_page": 8,
+                "layout": ["category_filter", "product_list", "items_per_page_selector"]
+            }),
+            PageBlock(page_name="pagina1", block_type="info_cards", order=4, title="Información"),
+        ]
+        PageBlock.objects.bulk_create(default_blocks)
+
     # Usar servicio para filtrar y ordenar productos
     query_params = {
         "category": request.GET.get("category", ""),
@@ -86,15 +156,29 @@ def pagina1(request):
     # Ofertas imperdibles
     ofertas_imperdibles = ProductService.get_offers_imperdibles()
     
+    default_cards = [
+        {"id": "help", "icon": "chat_bubble", "title": "¿Necesitas ayuda?", "subtitle": "Contacta a un agente", "link": "#"},
+        {"id": "orders", "icon": "box", "title": "Revisa tus compras", "subtitle": "Historial de pedido y despacho", "link": "/profile/"},
+        {"id": "returns", "icon": "return", "title": "Cambios y devoluciones", "subtitle": "Todo lo que necesitas saber", "link": "#"},
+        {"id": "stores", "icon": "map_pin", "title": "Nuestras Tiendas", "subtitle": "Horarios y direcciones", "link": "#"}
+    ]
+
     # Paginación
     paginator = Paginator(productos, context["items_per_page"])
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+
+    # Bloques y Modo Edición
+    blocks = PageBlock.objects.filter(page_name="pagina1", is_active=True).order_by('order')
+    edit_mode = request.GET.get('edit_mode') == 'true' and request.user.is_staff
     
     context.update({
         "productos": page_obj,
         "ofertas_imperdibles": ofertas_imperdibles,
-        "categories": categories
+        "categories": categories,
+        "blocks": blocks,
+        "edit_mode": edit_mode,
+        "default_cards": default_cards
     })
     
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -2637,9 +2721,12 @@ def create_campaign(request):
 @user_passes_test(lambda u: u.is_staff or u.groups.filter(name='admin').exists())
 def site_configuration_view(request):
     """Vista para editar la configuración del sitio con soporte para reset por tab"""
-    config = SiteConfiguration.objects.first()
-    if not config:
-        config = SiteConfiguration() # Create in memory if not exists, will be saved on POST
+    from .forms import SiteConfigurationForm
+    from django.contrib import messages
+    from .constants import THEME_DEFAULTS
+    
+    # Obtener o crear la configuración (singleton)
+    config, created = SiteConfiguration.objects.get_or_create(pk=1)
 
     # Obtener valores originales para comparación
     original_values = {
@@ -2651,14 +2738,7 @@ def site_configuration_view(request):
             'support_email': 'contacto@multitienda.cl',
             'support_phone': '+56 9 8837 6786',
         },
-        'appearance': {
-            'primary_color': '#3b84f8',
-            'secondary_color': '#9df38b',
-            'accent_color': '#ff6b6b',
-            'button_hover_color': '#2c5cc0',
-            'text_color': '#1a1a1a',
-            'background_color': '#ffffff',
-        },
+        'appearance': THEME_DEFAULTS,
         'announcement': {
             'show_announcement': False,
             'announcement_text': '',
@@ -2674,8 +2754,6 @@ def site_configuration_view(request):
     }
 
     if request.method == 'POST':
-        from .forms import SiteConfigurationForm
-        
         # Revisar si es un reset de tab
         reset_tab = request.POST.get('reset_tab')
         if reset_tab and reset_tab in original_values:
@@ -2695,9 +2773,205 @@ def site_configuration_view(request):
             return redirect('site_configuration')
         else:
             messages.error(request, "Error al actualizar la configuración.")
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
     else:
-        from .forms import SiteConfigurationForm
         form = SiteConfigurationForm(instance=config)
 
     return render(request, 'site_configuration.html', {'form': form})
 
+
+def theme_editor_view(request):
+    """Vista para el editor visual de temas"""
+    from .forms import SiteConfigurationForm
+    from django.contrib import messages
+    
+    config, created = SiteConfiguration.objects.get_or_create(pk=1)
+    
+    if request.method == 'POST':
+        form = SiteConfigurationForm(request.POST, request.FILES, instance=config)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Tema actualizado correctamente.')
+            return redirect('theme_editor')
+        else:
+            messages.error(request, 'Error al guardar el tema.')
+    else:
+        form = SiteConfigurationForm(instance=config)
+        
+    return render(request, 'theme_editor.html', {
+        'form': form,
+        'site_config': config
+    })
+
+
+def dynamic_theme_css(request):
+    """Vista que genera CSS dinámico basado en la configuración del sitio"""
+    from django.http import HttpResponse
+    from .constants import THEME_DEFAULTS
+    
+    config = SiteConfiguration.objects.first()
+    
+    # Valores por defecto si no existe configuración
+    if not config:
+        # Usar valores de constantes si no hay config (fallback)
+        vars_css = "\n".join([f"--{key.replace('_', '-')}: {value};" for key, value in THEME_DEFAULTS.items()])
+        vars_css += "\n--bg-product-card: #FFFFFF;" # Fallback extra
+    else:
+        vars_css = f"""
+        --bg-body: {config.bg_body};
+        --bg-surface: {config.bg_surface};
+        --bg-soft: {config.bg_soft};
+        --bg-product-card: {config.product_card_bg};
+        
+        --color-primary: {config.primary_color};
+        --color-primary-dark: {config.primary_color_dark};
+        --color-primary-light: {config.primary_color_light};
+        
+        --color-secondary: {config.secondary_color};
+        --color-secondary-dark: {config.secondary_color_dark};
+        
+        --color-accent: {config.accent_color};
+        --color-accent-dark: {config.accent_color_dark};
+        
+        --color-danger: {config.danger_color};
+        --color-danger-dark: {config.danger_color_dark};
+        --color-warning: {config.warning_color};
+        --color-info: {config.info_color};
+        --color-success: {config.success_color};
+        
+        --text-main: {config.text_main};
+        --text-muted: {config.text_muted};
+        --text-light: {config.text_light};
+        --text-white: #FFFFFF;
+        """
+    
+    # Generar CSS dinámico completo
+    css_content = f"""
+    :root {{
+        {vars_css}
+        
+        /* Variables derivadas o estáticas */
+        --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+        --shadow-md: 0 4px 6px rgba(0,0,0,0.07);
+        --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+        --radius-sm: 0.25rem;
+        --radius-md: 0.5rem;
+        --radius-lg: 1rem;
+        --transition-fast: 0.2s ease;
+        --transition-normal: 0.3s ease;
+    }}
+    
+    /* Aplicar colores a elementos principales */
+    body {{
+        background-color: var(--bg-body);
+        color: var(--text-main);
+    }}
+    
+    .bg-surface {{ background-color: var(--bg-surface); }}
+    .bg-soft {{ background-color: var(--bg-soft); }}
+    
+    .text-main {{ color: var(--text-main); }}
+    .text-muted {{ color: var(--text-muted); }}
+    .text-light {{ color: var(--text-light); }}
+    
+    /* Bootstrap Overrides */
+    .btn-primary {{
+        background-color: var(--color-primary) !important;
+        border-color: var(--color-primary) !important;
+    }}
+    
+    .btn-primary:hover {{
+        background-color: var(--color-primary-dark) !important;
+        border-color: var(--color-primary-dark) !important;
+    }}
+    
+    .btn-secondary {{
+        background-color: var(--color-secondary) !important;
+        border-color: var(--color-secondary) !important;
+        color: var(--text-main) !important;
+    }}
+    
+    .btn-secondary:hover {{
+        background-color: var(--color-secondary-dark) !important;
+        border-color: var(--color-secondary-dark) !important;
+    }}
+    
+    .btn-danger {{
+        background-color: var(--color-danger) !important;
+        border-color: var(--color-danger) !important;
+    }}
+    
+    .btn-danger:hover {{
+        background-color: var(--color-danger-dark) !important;
+        border-color: var(--color-danger-dark) !important;
+    }}
+    
+    .btn-light {{
+        background-color: var(--bg-soft) !important;
+        border-color: var(--border-color) !important;
+        color: var(--text-main) !important;
+    }}
+    
+    .btn-light:hover {{
+        background-color: var(--bg-surface) !important;
+        border-color: var(--border-color-strong) !important;
+    }}
+
+    a {{
+        color: var(--color-primary);
+        text-decoration: none;
+    }}
+    
+    a:hover {{
+        color: var(--color-primary-dark);
+        text-decoration: underline;
+    }}
+    
+    .navbar {{
+        background-color: var(--color-primary) !important;
+    }}
+    
+    .badge {{
+        background-color: var(--color-accent) !important;
+        color: var(--text-main);
+    }}
+    
+    /* Inputs */
+    .form-control:focus {{
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 0.25rem rgba(59, 132, 248, 0.25); /* Usar primary con opacidad si es posible, o hardcode */
+    }}
+    """
+    
+    response = HttpResponse(css_content, content_type='text/css')
+    # Cache control: Cachear por 1 hora, pero revalidar si cambia el query param
+    response['Cache-Control'] = 'public, max-age=3600'
+    return response
+
+@user_passes_test(lambda u: u.is_staff)
+def ui_test(request):
+    """
+    Vista para probar componentes de UI y el sistema de diseño.
+    Solo accesible para staff.
+    """
+    from .forms import SiteConfigurationForm
+    from .models import SiteConfiguration
+    
+    # Sample data for components
+    sample_products = Product.objects.all()[:4]
+    sample_orders = Order.objects.all()[:5]
+    
+    # Sample form (unbound)
+    # We use SiteConfigurationForm as it has many field types
+    config = SiteConfiguration.get_solo()
+    form = SiteConfigurationForm(instance=config)
+    
+    context = {
+        'sample_products': sample_products,
+        'sample_orders': sample_orders,
+        'form': form,
+        'site_config': config,
+    }
+    return render(request, 'ui_test.html', context)

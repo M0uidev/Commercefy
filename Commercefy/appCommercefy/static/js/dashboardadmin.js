@@ -14,6 +14,21 @@ document.addEventListener('DOMContentLoaded', () => {
         maximumFractionDigits: 0,
     });
 
+    // Helper to get CSS variable value
+    const getCssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+    // Dynamic Theme Colors for Highcharts
+    const themeColors = [
+        getCssVar('--color-primary') || '#4f46e5',
+        getCssVar('--color-secondary') || '#22c55e',
+        getCssVar('--color-accent') || '#f97316',
+        getCssVar('--color-info') || '#0ea5e9',
+        getCssVar('--color-danger') || '#ec4899',
+        getCssVar('--color-warning') || '#f59e0b',
+        getCssVar('--color-success') || '#8b5cf6',
+        '#a01d8eff' // Fallback/Extra
+    ];
+
     // Highcharts Global Options
     Highcharts.setOptions({
         chart: {
@@ -43,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
             thousandsSep: ".",
             decimalPoint: ','
         },
-        colors: ['#4f46e5', '#22c55e', '#f97316', '#0ea5e9', '#ec4899', '#f59e0b', '#8b5cf6', '#a01d8eff'],
+        colors: themeColors,
         tooltip: {
             backgroundColor: 'rgba(255, 255, 255, 0.95)',
             borderColor: '#e5e7eb',

@@ -526,12 +526,40 @@ class SiteConfiguration(models.Model):
     support_phone = models.CharField(max_length=20, default="+56 9 8837 6786", verbose_name="Teléfono de Soporte")
     logo = models.ImageField(upload_to='site_config/', blank=True, null=True, verbose_name="Logo del Sitio")
     
-    # Apariencia
+    # Apariencia - Fondos
+    bg_body = models.CharField(max_length=7, default="#F8F9FA", verbose_name="Fondo Body", help_text="Formato HEX")
+    bg_surface = models.CharField(max_length=7, default="#FFFFFF", verbose_name="Fondo Superficie", help_text="Formato HEX")
+    bg_soft = models.CharField(max_length=7, default="#F5F5F5", verbose_name="Fondo Suave", help_text="Formato HEX")
+    product_card_bg = models.CharField(max_length=7, default="#FFFFFF", verbose_name="Fondo Tarjeta Producto", help_text="Formato HEX")
+    
+    # Apariencia - Colores Primarios
     primary_color = models.CharField(max_length=7, default="#3b84f8", verbose_name="Color Primario", help_text="Formato HEX (ej: #3b84f8)")
+    primary_color_dark = models.CharField(max_length=7, default="#276adf", verbose_name="Color Primario Oscuro", help_text="Formato HEX")
+    primary_color_light = models.CharField(max_length=7, default="#5789e7", verbose_name="Color Primario Claro", help_text="Formato HEX")
+    
+    # Apariencia - Colores Secundarios
     secondary_color = models.CharField(max_length=7, default="#9df38b", verbose_name="Color Secundario", help_text="Formato HEX (ej: #9df38b)")
-    accent_color = models.CharField(max_length=7, default="#ff6b6b", verbose_name="Color de Acentos", help_text="Formato HEX (ej: #ff6b6b)")
+    secondary_color_dark = models.CharField(max_length=7, default="#82e76c", verbose_name="Color Secundario Oscuro", help_text="Formato HEX")
+    
+    # Apariencia - Acentos
+    accent_color = models.CharField(max_length=7, default="#FFD6A5", verbose_name="Color de Acentos", help_text="Formato HEX")
+    accent_color_dark = models.CharField(max_length=7, default="#FFC085", verbose_name="Color de Acentos Oscuro", help_text="Formato HEX")
+    
+    # Apariencia - Estado
+    danger_color = models.CharField(max_length=7, default="#ed6464", verbose_name="Color Peligro", help_text="Formato HEX")
+    danger_color_dark = models.CharField(max_length=7, default="#f35050", verbose_name="Color Peligro Oscuro", help_text="Formato HEX")
+    warning_color = models.CharField(max_length=7, default="#FFD93D", verbose_name="Color Advertencia", help_text="Formato HEX")
+    info_color = models.CharField(max_length=7, default="#9BF6FF", verbose_name="Color Información", help_text="Formato HEX")
+    success_color = models.CharField(max_length=7, default="#CAFFBF", verbose_name="Color Éxito", help_text="Formato HEX")
+    
+    # Apariencia - Texto
+    text_main = models.CharField(max_length=7, default="#2D3436", verbose_name="Texto Principal", help_text="Formato HEX")
+    text_muted = models.CharField(max_length=7, default="#636E72", verbose_name="Texto Silenciado", help_text="Formato HEX")
+    text_light = models.CharField(max_length=7, default="#B2BEC3", verbose_name="Texto Claro", help_text="Formato HEX")
+    
+    # Legacy colors
     button_hover_color = models.CharField(max_length=7, default="#2c5cc0", verbose_name="Color Hover de Botones", help_text="Formato HEX (ej: #2c5cc0)")
-    text_color = models.CharField(max_length=7, default="#1a1a1a", verbose_name="Color de Texto", help_text="Formato HEX (ej: #1a1a1a)")
+    text_color = models.CharField(max_length=7, default="#1a1a1a", verbose_name="Color de Texto Legado", help_text="Formato HEX (ej: #1a1a1a)")
     background_color = models.CharField(max_length=7, default="#ffffff", verbose_name="Color de Fondo", help_text="Formato HEX (ej: #ffffff)")
     
     # Redes Sociales
@@ -545,6 +573,8 @@ class SiteConfiguration(models.Model):
     # Anuncios
     show_announcement = models.BooleanField(default=False, verbose_name="Mostrar Anuncio")
     announcement_text = models.CharField(max_length=200, blank=True, verbose_name="Texto del Anuncio")
+
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Última Actualización")
 
     class Meta:
         verbose_name = "Configuración del Sitio"
@@ -563,5 +593,32 @@ class SiteConfiguration(models.Model):
     def get_solo(cls):
         obj, created = cls.objects.get_or_create(pk=1)
         return obj
+
+
+class PageBlock(models.Model):
+    """Modelo para bloques de contenido dinámico en páginas"""
+    BLOCK_TYPES = [
+        ('hero', 'Hero Section'),
+        ('offers_carousel', 'Carrusel de Ofertas'),
+        ('product_list', 'Lista de Productos'),
+        ('info_cards', 'Tarjetas de Información'),
+        ('html', 'HTML Personalizado'),
+    ]
+
+    page_name = models.CharField(max_length=50, verbose_name="Nombre de la Página", default="pagina1")
+    block_type = models.CharField(max_length=50, choices=BLOCK_TYPES, verbose_name="Tipo de Bloque")
+    order = models.PositiveIntegerField(default=0, verbose_name="Orden")
+    title = models.CharField(max_length=200, blank=True, verbose_name="Título")
+    content = models.JSONField(default=dict, blank=True, verbose_name="Contenido (JSON)")
+    is_active = models.BooleanField(default=True, verbose_name="Activo")
+
+    class Meta:
+        db_table = 'pageblock'
+        ordering = ['order']
+        verbose_name = "Bloque de Página"
+        verbose_name_plural = "Bloques de Página"
+
+    def __str__(self):
+        return f"{self.page_name} - {self.get_block_type_display()} ({self.order})"
 
 

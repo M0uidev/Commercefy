@@ -1,7 +1,7 @@
 /* Estilos de tarjetas de producto */
 .product-card {
   /* Mantiene consistencia con el diseño dashboard */
-  --card-bg: #ffffff;
+  --card-bg: var(--bg-product-card, #ffffff);
   --card-border: rgba(148, 163, 184, 0.1);
   --card-shadow: 0 18px 35px rgba(15, 23, 42, 0.06);
 

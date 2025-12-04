@@ -1,0 +1,41 @@
+<section class="container mb-5" id="imperdibles">
+    {% if use_card_wrapper %}
+    <div class="dash-card p-4">
+    {% endif %}
+        <div class="d-flex align-items-center mb-4 border-bottom pb-3">
+            <h2 class="h4 fw-bold mb-0 text-main">
+                <i class="bi bi-grid-3x3-gap-fill me-2"></i>{{ title|default:"Productos para ti" }}
+            </h2>
+        </div>
+        <div class="card-content">
+            {% if config.layout %}
+                {% for component in config.layout %}
+                    {% if component == 'category_filter' and config.show_category_filter %}
+                        {% include 'components/subcomponents/category_filter.html' %}
+                    {% elif component == 'product_list' %}
+                        <div id="product-list-container">
+                            {% include 'partials/product_list.html' %}
+                        </div>
+                    {% elif component == 'items_per_page_selector' and config.show_items_per_page_selector %}
+                        {% include 'components/subcomponents/items_per_page_selector.html' %}
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <!-- Default Layout Fallback -->
+                {% if config.show_category_filter %}
+                    {% include 'components/subcomponents/category_filter.html' %}
+                {% endif %}
+
+                <div id="product-list-container">
+                    {% include 'partials/product_list.html' %}
+                </div>
+
+                {% if config.show_items_per_page_selector %}
+                    {% include 'components/subcomponents/items_per_page_selector.html' %}
+                {% endif %}
+            {% endif %}
+        </div>
+    {% if use_card_wrapper %}
+    </div>
+    {% endif %}
+</section>

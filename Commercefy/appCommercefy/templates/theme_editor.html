@@ -1,0 +1,488 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Editor de Tema{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Layout del Editor */
+    .theme-editor-container {
+        display: flex;
+        height: calc(100vh - 70px); /* Ajustar según altura del navbar */
+        overflow: hidden;
+        background-color: #f3f4f6;
+    }
+
+    /* Panel Izquierdo: Controles */
+    .editor-sidebar {
+        width: 400px;
+        background: white;
+        border-right: 1px solid #e5e7eb;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+        flex-shrink: 0;
+        z-index: 10;
+        box-shadow: 4px 0 24px rgba(0,0,0,0.05);
+    }
+
+    .editor-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid #e5e7eb;
+        background: white;
+        position: sticky;
+        top: 0;
+        z-index: 20;
+    }
+
+    .editor-sections {
+        padding: 1.5rem;
+    }
+
+    .config-section {
+        margin-bottom: 2rem;
+        background: #fff;
+        border-radius: 8px;
+    }
+
+    .config-section-title {
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #6b7280;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    .color-input-group {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+        border-radius: 6px;
+        transition: background 0.2s;
+    }
+
+    .color-input-group:hover {
+        background: #f9fafb;
+    }
+
+    .color-input-group label {
+        flex: 1;
+        font-size: 0.9rem;
+        color: #374151;
+        margin-bottom: 0;
+        cursor: pointer;
+    }
+
+    .color-input-group input[type="color"] {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        background: none;
+    }
+    
+    .color-input-group input[type="text"], 
+    .color-input-group input[type="email"],
+    .color-input-group textarea {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 0.9rem;
+    }
+
+    /* Panel Derecho: Preview */
+    .preview-pane {
+        flex: 1;
+        padding: 2rem;
+        overflow-y: auto;
+        background-color: #f3f4f6;
+        display: flex;
+        justify-content: center;
+    }
+
+    .preview-canvas {
+        width: 100%;
+        max-width: 1000px;
+        background: var(--bg-body, #F8F9FA); /* Usar variable para que el fondo también cambie */
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        padding: 2rem;
+        min-height: 100%;
+        transition: background-color 0.3s ease;
+    }
+
+    .preview-section {
+        margin-bottom: 3rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px dashed #e5e7eb;
+    }
+    
+    .preview-section:last-child {
+        border-bottom: none;
+    }
+
+    .preview-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-main);
+        margin-bottom: 1.5rem;
+        opacity: 0.7;
+    }
+
+    /* Highcharts Container */
+    .chart-preview-container {
+        background: var(--bg-surface);
+        padding: 1rem;
+        border-radius: 16px;
+        box-shadow: var(--shadow-sm);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="theme-editor-container">
+    <!-- Panel Izquierdo: Formulario -->
+    <form method="post" enctype="multipart/form-data" class="editor-sidebar" id="themeForm">
+        {% csrf_token %}
+        
+        <div class="editor-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold">Editor de Tema</h5>
+            <button type="submit" class="btn btn-primary btn-sm px-4">
+                <i class="bi bi-save me-2"></i>Guardar
+            </button>
+        </div>
+
+        <div class="editor-sections">
+            <!-- Marca -->
+            <div class="config-section">
+                <div class="config-section-title">Identidad de Marca</div>
+                <div class="mb-3">
+                    <label class="form-label small text-muted">Nombre del Sitio</label>
+                    {{ form.site_name }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small text-muted">Logo</label>
+                    {{ form.logo }}
+                </div>
+            </div>
+
+            <!-- Colores Primarios -->
+            <div class="config-section">
+                <div class="config-section-title">Colores Primarios</div>
+                <div class="color-input-group">
+                    <label for="{{ form.primary_color.id_for_label }}">Primario Principal</label>
+                    {{ form.primary_color }}
+                </div>
+                <div class="color-input-group">
+                    <label for="{{ form.primary_color_dark.id_for_label }}">Primario Oscuro</label>
+                    {{ form.primary_color_dark }}
+                </div>
+                <div class="color-input-group">
+                    <label for="{{ form.primary_color_light.id_for_label }}">Primario Claro</label>
+                    {{ form.primary_color_light }}
+                </div>
+            </div>
+
+            <!-- Colores Secundarios -->
+            <div class="config-section">
+                <div class="config-section-title">Colores Secundarios</div>
+                <div class="color-input-group">
+                    <label for="{{ form.secondary_color.id_for_label }}">Secundario Principal</label>
+                    {{ form.secondary_color }}
+                </div>
+                <div class="color-input-group">
+                    <label for="{{ form.secondary_color_dark.id_for_label }}">Secundario Oscuro</label>
+                    {{ form.secondary_color_dark }}
+                </div>
+            </div>
+
+            <!-- Fondos -->
+            <div class="config-section">
+                <div class="config-section-title">Fondos y Superficies</div>
+                <div class="color-input-group">
+                    <label for="{{ form.bg_body.id_for_label }}">Fondo General (Body)</label>
+                    {{ form.bg_body }}
+                </div>
+                <div class="color-input-group">
+                    <label for="{{ form.bg_surface.id_for_label }}">Superficie (Cards)</label>
+                    {{ form.bg_surface }}
+                </div>
+                <div class="color-input-group">
+                    <label for="{{ form.bg_soft.id_for_label }}">Fondo Suave</label>
+                    {{ form.bg_soft }}
+                </div>
+                <div class="color-input-group">
+                    <label for="{{ form.product_card_bg.id_for_label }}">Tarjeta Producto</label>
+                    {{ form.product_card_bg }}
+                </div>
+            </div>
+
+            <!-- Estados -->
+            <div class="config-section">
+                <div class="config-section-title">Colores de Estado</div>
+                <div class="color-input-group">
+                    <label for="{{ form.success_color.id_for_label }}">Éxito</label>
+                    {{ form.success_color }}
+                </div>
+                <div class="color-input-group">
+                    <label for="{{ form.warning_color.id_for_label }}">Advertencia</label>
+                    {{ form.warning_color }}
+                </div>
+                <div class="color-input-group">
+                    <label for="{{ form.danger_color.id_for_label }}">Peligro / Error</label>
+                    {{ form.danger_color }}
+                </div>
+                <div class="color-input-group">
+                    <label for="{{ form.info_color.id_for_label }}">Información</label>
+                    {{ form.info_color }}
+                </div>
+            </div>
+            
+            <!-- Acentos -->
+            <div class="config-section">
+                <div class="config-section-title">Acentos</div>
+                <div class="color-input-group">
+                    <label for="{{ form.accent_color.id_for_label }}">Acento</label>
+                    {{ form.accent_color }}
+                </div>
+            </div>
+
+            <!-- Texto -->
+            <div class="config-section">
+                <div class="config-section-title">Tipografía</div>
+                <div class="color-input-group">
+                    <label for="{{ form.text_main.id_for_label }}">Texto Principal</label>
+                    {{ form.text_main }}
+                </div>
+                <div class="color-input-group">
+                    <label for="{{ form.text_muted.id_for_label }}">Texto Secundario</label>
+                    {{ form.text_muted }}
+                </div>
+            </div>
+            
+            <!-- Contacto & Redes (Ocultos en acordeón o al final) -->
+            <div class="config-section">
+                <div class="config-section-title">Contacto y Redes</div>
+                <div class="mb-2">
+                    <label class="form-label small">Email Soporte</label>
+                    {{ form.support_email }}
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small">Teléfono</label>
+                    {{ form.support_phone }}
+                </div>
+            </div>
+
+        </div>
+    </form>
+
+    <!-- Panel Derecho: Live Preview -->
+    <div class="preview-pane">
+        <div class="preview-canvas">
+            
+            <!-- Preview: Header -->
+            <div class="d-flex justify-content-between align-items-center mb-5">
+                <div>
+                    <h1 class="display-6 fw-bold" style="color: var(--text-main)">Vista Previa</h1>
+                    <p class="lead" style="color: var(--text-muted)">Así es como se ven tus cambios en tiempo real.</p>
+                </div>
+                <span class="badge bg-primary rounded-pill px-3 py-2">Tema Activo</span>
+            </div>
+
+            <!-- Preview: Highcharts -->
+            <div class="preview-section">
+                <h3 class="preview-title">Gráficos y Datos</h3>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="chart-preview-container">
+                            <div id="previewChart" style="height: 300px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview: Botones y Colores -->
+            <div class="preview-section">
+                <h3 class="preview-title">Botones y Acciones</h3>
+                <div class="d-flex flex-wrap gap-2 mb-4">
+                    <button class="btn btn-primary">Botón Primario</button>
+                    <button class="btn btn-secondary">Botón Secundario</button>
+                    <button class="btn btn-success">Éxito</button>
+                    <button class="btn btn-danger">Peligro</button>
+                    <button class="btn btn-warning">Advertencia</button>
+                    <button class="btn btn-info">Info</button>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <button class="btn btn-outline-primary">Outline Primario</button>
+                    <button class="btn btn-outline-secondary">Outline Secundario</button>
+                </div>
+            </div>
+
+            <!-- Preview: Cards y Superficies -->
+            <div class="preview-section">
+                <h3 class="preview-title">Tarjetas y Superficies</h3>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="card h-100 border-0 shadow-sm" style="background-color: var(--bg-surface)">
+                            <div class="card-body">
+                                <h5 class="card-title" style="color: var(--text-main)">Tarjeta Estándar</h5>
+                                <p class="card-text" style="color: var(--text-muted)">
+                                    Este es el fondo de superficie estándar. Ideal para contenedores de contenido principal.
+                                </p>
+                                <a href="#" class="btn btn-primary btn-sm">Acción</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card h-100 border-0 shadow-sm" style="background-color: var(--bg-product-card)">
+                            <div class="card-body">
+                                <h5 class="card-title" style="color: var(--text-main)">Tarjeta de Producto</h5>
+                                <p class="card-text" style="color: var(--text-muted)">
+                                    Fondo específico para productos. Puede ser diferente al de superficie general.
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <span class="fw-bold" style="color: var(--text-main)">$19.990</span>
+                                    <button class="btn btn-primary btn-sm rounded-circle"><i class="bi bi-cart"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview: Alertas -->
+            <div class="preview-section">
+                <h3 class="preview-title">Alertas y Mensajes</h3>
+                <div class="alert alert-primary" role="alert">
+                    <i class="bi bi-info-circle-fill me-2"></i> Una alerta primaria informativa.
+                </div>
+                <div class="alert alert-success" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i> Operación realizada con éxito.
+                </div>
+                <div class="alert alert-danger" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> Ha ocurrido un error crítico.
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Scripts para Live Preview -->
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // 1. Mapeo de Inputs a Variables CSS
+    const colorMap = {
+        'primary_color': '--color-primary',
+        'primary_color_dark': '--color-primary-dark',
+        'primary_color_light': '--color-primary-light',
+        'secondary_color': '--color-secondary',
+        'secondary_color_dark': '--color-secondary-dark',
+        'accent_color': '--color-accent',
+        'accent_color_dark': '--color-accent-dark',
+        'bg_body': '--bg-body',
+        'bg_surface': '--bg-surface',
+        'bg_soft': '--bg-soft',
+        'product_card_bg': '--bg-product-card',
+        'success_color': '--color-success',
+        'warning_color': '--color-warning',
+        'danger_color': '--color-danger',
+        'info_color': '--color-info',
+        'text_main': '--text-main',
+        'text_muted': '--text-muted',
+    };
+
+    // 2. Inicializar Highcharts Preview
+    const chart = Highcharts.chart('previewChart', {
+        chart: {
+            type: 'areaspline',
+            backgroundColor: 'transparent',
+            style: {
+                fontFamily: 'Inter, sans-serif'
+            }
+        },
+        title: {
+            text: 'Ventas Mensuales',
+            style: { color: getComputedStyle(document.documentElement).getPropertyValue('--text-main') }
+        },
+        xAxis: {
+            categories: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+            labels: { style: { color: getComputedStyle(document.documentElement).getPropertyValue('--text-muted') } }
+        },
+        yAxis: {
+            title: { text: 'Monto ($)', style: { color: getComputedStyle(document.documentElement).getPropertyValue('--text-muted') } },
+            labels: { style: { color: getComputedStyle(document.documentElement).getPropertyValue('--text-muted') } },
+            gridLineColor: 'rgba(0,0,0,0.05)'
+        },
+        legend: {
+            itemStyle: { color: getComputedStyle(document.documentElement).getPropertyValue('--text-main') }
+        },
+        series: [{
+            name: 'Ventas 2025',
+            data: [3, 4, 3, 5, 4, 10],
+            color: getComputedStyle(document.documentElement).getPropertyValue('--color-primary') || '#3b84f8'
+        }, {
+            name: 'Ventas 2024',
+            data: [1, 3, 4, 3, 3, 5],
+            color: getComputedStyle(document.documentElement).getPropertyValue('--color-secondary') || '#9df38b'
+        }],
+        credits: { enabled: false }
+    });
+
+    // 3. Función para actualizar todo
+    function updateTheme(inputName, value) {
+        const cssVar = colorMap[inputName];
+        if (cssVar) {
+            // Actualizar variable CSS globalmente
+            document.documentElement.style.setProperty(cssVar, value);
+            
+            // Actualizar Chart si es un color relevante
+            if (['primary_color', 'secondary_color', 'text_main', 'text_muted'].includes(inputName)) {
+                updateChartColors();
+            }
+        }
+    }
+
+    function updateChartColors() {
+        const primary = getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim();
+        const secondary = getComputedStyle(document.documentElement).getPropertyValue('--color-secondary').trim();
+        const textMain = getComputedStyle(document.documentElement).getPropertyValue('--text-main').trim();
+        const textMuted = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim();
+
+        chart.update({
+            title: { style: { color: textMain } },
+            xAxis: { labels: { style: { color: textMuted } } },
+            yAxis: { 
+                title: { style: { color: textMuted } },
+                labels: { style: { color: textMuted } }
+            },
+            legend: { itemStyle: { color: textMain } },
+            series: [
+                { color: primary },
+                { color: secondary }
+            ]
+        });
+    }
+
+    // 4. Listeners para todos los inputs de color
+    document.querySelectorAll('input[type="color"]').forEach(input => {
+        // Evento 'input' dispara mientras se arrastra el color picker
+        input.addEventListener('input', (e) => {
+            updateTheme(e.target.name, e.target.value);
+        });
+    });
+
+    // Inicializar chart con colores correctos al cargar (por si CSS tardó)
+    setTimeout(updateChartColors, 500);
+});
+</script>
+{% endblock %}

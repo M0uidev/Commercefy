@@ -4,180 +4,115 @@
 {% block title %}Configuración del Sitio{% endblock %}
 
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/dashboardtrabajador.css' %}">
-  <style>
+<style>
     .config-wrapper {
         background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.05);
-        max-width: 1000px;
-        margin: 0 auto;
-        overflow: hidden;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        padding: 2rem;
     }
-
     .nav-tabs {
-        background: #f8f9fa;
-        border-bottom: 2px solid #e5e7eb;
-        border-radius: 12px 12px 0 0;
+        border-bottom: 2px solid #f0f0f0;
+        margin-bottom: 2rem;
     }
-
     .nav-tabs .nav-link {
-        color: #6b7280;
         border: none;
-        border-bottom: 3px solid transparent;
+        color: #6c757d;
         font-weight: 500;
         padding: 1rem 1.5rem;
-        transition: all 0.3s ease;
+        transition: all 0.2s;
     }
-
     .nav-tabs .nav-link:hover {
-        color: #3b84f8;
-        background: rgba(59, 132, 248, 0.05);
+        color: var(--color-primary);
+        background: rgba(0,0,0,0.02);
     }
-
     .nav-tabs .nav-link.active {
-        color: #3b84f8;
+        color: var(--color-primary);
+        border-bottom: 2px solid var(--color-primary);
         background: transparent;
-        border-bottom-color: #3b84f8;
     }
-
-    .tab-pane {
-        padding: 2rem;
-        display: none;
-    }
-
-    .tab-pane.show.active {
-        display: block;
-        animation: fadeIn 0.3s ease;
-    }
-
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-        }
-        to {
-            opacity: 1;
-        }
-    }
-
     .form-label {
-        font-weight: 500;
-        color: #4b5563;
+        font-weight: 600;
+        color: #344767;
         margin-bottom: 0.5rem;
     }
-
-    .form-text {
-        color: #9ca3af;
-        font-size: 0.875rem;
+    .form-control, .form-select {
+        border: 1px solid #e9ecef;
+        padding: 0.6rem 1rem;
+        border-radius: 6px;
     }
-
+    .form-control:focus {
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.1);
+    }
+    .color-input-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0.5rem;
+        border: 1px solid #e9ecef;
+        border-radius: 6px;
+        background: #f8f9fa;
+    }
+    .color-input-group input[type="color"] {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .color-input-group input[type="text"] {
+        border: none;
+        background: transparent;
+        font-family: monospace;
+        color: #495057;
+    }
+    .current-logo {
+        max-height: 60px;
+        border: 1px dashed #dee2e6;
+        padding: 5px;
+        border-radius: 4px;
+    }
     .tab-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin-bottom: 1.5rem;
         padding-bottom: 1rem;
-        border-bottom: 1px solid #e5e7eb;
+        border-bottom: 1px solid #f0f0f0;
     }
-
-    .tab-header h5 {
-        margin: 0;
-        color: #1f2937;
-        font-weight: 600;
-    }
-
     .btn-reset-tab {
-        background: #f3f4f6;
-        color: #6b7280;
-        border: 1px solid #d1d5db;
-        padding: 0.5rem 1rem;
-        border-radius: 6px;
-        font-size: 0.875rem;
-        transition: all 0.3s ease;
+        font-size: 0.85rem;
+        color: #dc3545;
+        background: none;
+        border: 1px solid #dc3545;
+        padding: 0.25rem 0.75rem;
+        border-radius: 4px;
+        transition: all 0.2s;
     }
-
     .btn-reset-tab:hover {
-        background: #e5e7eb;
-        color: #374151;
-        text-decoration: none;
+        background: #dc3545;
+        color: white;
     }
-
-    .current-logo {
-        max-width: 200px;
-        border-radius: 8px;
-        border: 1px solid #e5e7eb;
-        padding: 0.5rem;
-        margin-bottom: 1rem;
-    }
-
-    .color-input-group {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .color-input-group input[type="color"] {
-        width: 60px;
-        height: 40px;
-        border: 1px solid #d1d5db;
-        border-radius: 6px;
-        cursor: pointer;
-    }
-
-    .form-control:focus {
-        border-color: #3b84f8;
-        box-shadow: 0 0 0 3px rgba(59, 132, 248, 0.1);
-    }
-
-    .btn-primary {
-        background: #3b84f8;
-        border-color: #3b84f8;
-        padding: 0.625rem 1.5rem;
-        border-radius: 6px;
-    }
-
-    .btn-primary:hover {
-        background: #2c5cc0;
-        border-color: #2c5cc0;
-    }
-
-    .btn-light {
-        background: #f3f4f6;
-        border: 1px solid #d1d5db;
-        color: #374151;
-    }
-
-    .btn-light:hover {
-        background: #e5e7eb;
-        color: #1f2937;
-    }
-
-    .footer-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 1rem;
-        padding: 1.5rem 2rem;
-        border-top: 1px solid #e5e7eb;
-        background: #fafafa;
-        border-radius: 0 0 12px 12px;
-    }
-
-    .text-danger {
-        color: #dc2626;
-        font-size: 0.875rem;
-        margin-top: 0.25rem;
-    }
-
     .form-row {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
         gap: 1.5rem;
+        margin-bottom: 1.5rem;
     }
-
     .form-row.wide {
         grid-template-columns: 1fr;
     }
-  </style>
+    .footer-actions {
+        margin-top: 3rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #f0f0f0;
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -233,13 +168,9 @@
                 <div class="tab-pane fade show active" id="brand-pane" role="tabpanel">
                     <div class="tab-header">
                         <h5>Identidad de Marca</h5>
-                        <form method="post" style="display: inline;">
-                            {% csrf_token %}
-                            <input type="hidden" name="reset_tab" value="brand">
-                            <button type="submit" class="btn-reset-tab">
-                                <i class="bi bi-arrow-clockwise me-1"></i>Restablecer Tab
-                            </button>
-                        </form>
+                        <button type="button" class="btn-reset-tab" onclick="resetTab(this, 'brand')">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Restablecer Tab
+                        </button>
                     </div>
 
                     <div class="form-row wide">
@@ -274,13 +205,9 @@
                 <div class="tab-pane fade" id="contact-pane" role="tabpanel">
                     <div class="tab-header">
                         <h5>Información de Contacto</h5>
-                        <form method="post" style="display: inline;">
-                            {% csrf_token %}
-                            <input type="hidden" name="reset_tab" value="contact">
-                            <button type="submit" class="btn-reset-tab">
-                                <i class="bi bi-arrow-clockwise me-1"></i>Restablecer Tab
-                            </button>
-                        </form>
+                        <button type="button" class="btn-reset-tab" onclick="resetTab(this, 'contact')">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Restablecer Tab
+                        </button>
                     </div>
 
                     <div class="form-row">
@@ -305,62 +232,173 @@
                 <div class="tab-pane fade" id="appearance-pane" role="tabpanel">
                     <div class="tab-header">
                         <h5>Personalización de Colores</h5>
-                        <form method="post" style="display: inline;">
-                            {% csrf_token %}
-                            <input type="hidden" name="reset_tab" value="appearance">
-                            <button type="submit" class="btn-reset-tab">
-                                <i class="bi bi-arrow-clockwise me-1"></i>Restablecer Tab
-                            </button>
-                        </form>
+                        <button type="button" class="btn-reset-tab" onclick="resetTab(this, 'appearance')">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Restablecer Tab
+                        </button>
                     </div>
 
+                    <h6 class="text-muted mb-3 border-bottom pb-2">Fondos</h6>
                     <div class="form-row">
                         <div>
-                            <label for="{{ form.primary_color.id_for_label }}" class="form-label">Color Primario</label>
+                            <label for="{{ form.bg_body.id_for_label }}" class="form-label">Fondo Body</label>
+                            <div class="color-input-group">
+                                {{ form.bg_body }}
+                                <span class="small text-muted">Fondo principal</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="{{ form.bg_surface.id_for_label }}" class="form-label">Fondo Superficie</label>
+                            <div class="color-input-group">
+                                {{ form.bg_surface }}
+                                <span class="small text-muted">Tarjetas y contenedores</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="{{ form.bg_soft.id_for_label }}" class="form-label">Fondo Suave</label>
+                            <div class="color-input-group">
+                                {{ form.bg_soft }}
+                                <span class="small text-muted">Fondos alternativos</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="{{ form.product_card_bg.id_for_label }}" class="form-label">Fondo Tarjeta Producto</label>
+                            <div class="color-input-group">
+                                {{ form.product_card_bg }}
+                                <span class="small text-muted">Tarjetas de productos</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h6 class="text-muted mb-3 mt-4 border-bottom pb-2">Colores Primarios</h6>
+                    <div class="form-row">
+                        <div>
+                            <label for="{{ form.primary_color.id_for_label }}" class="form-label">Primario</label>
                             <div class="color-input-group">
                                 {{ form.primary_color }}
-                                <span class="small text-muted">Botones y encabezados</span>
                             </div>
                         </div>
                         <div>
-                            <label for="{{ form.secondary_color.id_for_label }}" class="form-label">Color Secundario</label>
+                            <label for="{{ form.primary_color_dark.id_for_label }}" class="form-label">Primario Oscuro</label>
+                            <div class="color-input-group">
+                                {{ form.primary_color_dark }}
+                            </div>
+                        </div>
+                        <div>
+                            <label for="{{ form.primary_color_light.id_for_label }}" class="form-label">Primario Claro</label>
+                            <div class="color-input-group">
+                                {{ form.primary_color_light }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <h6 class="text-muted mb-3 mt-4 border-bottom pb-2">Colores Secundarios</h6>
+                    <div class="form-row">
+                        <div>
+                            <label for="{{ form.secondary_color.id_for_label }}" class="form-label">Secundario</label>
                             <div class="color-input-group">
                                 {{ form.secondary_color }}
-                                <span class="small text-muted">Acentos y detalles</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="{{ form.secondary_color_dark.id_for_label }}" class="form-label">Secundario Oscuro</label>
+                            <div class="color-input-group">
+                                {{ form.secondary_color_dark }}
                             </div>
                         </div>
                     </div>
 
-                    <div class="form-row mt-3">
+                    <h6 class="text-muted mb-3 mt-4 border-bottom pb-2">Acentos</h6>
+                    <div class="form-row">
                         <div>
-                            <label for="{{ form.accent_color.id_for_label }}" class="form-label">Color de Acentos</label>
+                            <label for="{{ form.accent_color.id_for_label }}" class="form-label">Acento</label>
                             <div class="color-input-group">
                                 {{ form.accent_color }}
-                                <span class="small text-muted">Énfasis visual</span>
                             </div>
                         </div>
                         <div>
-                            <label for="{{ form.button_hover_color.id_for_label }}" class="form-label">Color Hover Botones</label>
+                            <label for="{{ form.accent_color_dark.id_for_label }}" class="form-label">Acento Oscuro</label>
                             <div class="color-input-group">
-                                {{ form.button_hover_color }}
-                                <span class="small text-muted">Al pasar mouse</span>
+                                {{ form.accent_color_dark }}
                             </div>
                         </div>
                     </div>
 
-                    <div class="form-row mt-3">
+                    <h6 class="text-muted mb-3 mt-4 border-bottom pb-2">Estados</h6>
+                    <div class="form-row">
                         <div>
-                            <label for="{{ form.text_color.id_for_label }}" class="form-label">Color de Texto</label>
+                            <label for="{{ form.danger_color.id_for_label }}" class="form-label">Peligro</label>
                             <div class="color-input-group">
-                                {{ form.text_color }}
-                                <span class="small text-muted">Texto general</span>
+                                {{ form.danger_color }}
                             </div>
                         </div>
                         <div>
-                            <label for="{{ form.background_color.id_for_label }}" class="form-label">Color de Fondo</label>
+                            <label for="{{ form.danger_color_dark.id_for_label }}" class="form-label">Peligro Oscuro</label>
+                            <div class="color-input-group">
+                                {{ form.danger_color_dark }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row mt-2">
+                        <div>
+                            <label for="{{ form.warning_color.id_for_label }}" class="form-label">Advertencia</label>
+                            <div class="color-input-group">
+                                {{ form.warning_color }}
+                            </div>
+                        </div>
+                        <div>
+                            <label for="{{ form.info_color.id_for_label }}" class="form-label">Información</label>
+                            <div class="color-input-group">
+                                {{ form.info_color }}
+                            </div>
+                        </div>
+                        <div>
+                            <label for="{{ form.success_color.id_for_label }}" class="form-label">Éxito</label>
+                            <div class="color-input-group">
+                                {{ form.success_color }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <h6 class="text-muted mb-3 mt-4 border-bottom pb-2">Texto</h6>
+                    <div class="form-row">
+                        <div>
+                            <label for="{{ form.text_main.id_for_label }}" class="form-label">Texto Principal</label>
+                            <div class="color-input-group">
+                                {{ form.text_main }}
+                            </div>
+                        </div>
+                        <div>
+                            <label for="{{ form.text_muted.id_for_label }}" class="form-label">Texto Silenciado</label>
+                            <div class="color-input-group">
+                                {{ form.text_muted }}
+                            </div>
+                        </div>
+                        <div>
+                            <label for="{{ form.text_light.id_for_label }}" class="form-label">Texto Claro</label>
+                            <div class="color-input-group">
+                                {{ form.text_light }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h6 class="text-muted mb-3 mt-4 border-bottom pb-2">Legacy (Compatibilidad)</h6>
+                    <div class="form-row">
+                        <div>
+                            <label for="{{ form.button_hover_color.id_for_label }}" class="form-label">Hover Botones</label>
+                            <div class="color-input-group">
+                                {{ form.button_hover_color }}
+                            </div>
+                        </div>
+                        <div>
+                            <label for="{{ form.text_color.id_for_label }}" class="form-label">Texto (Legacy)</label>
+                            <div class="color-input-group">
+                                {{ form.text_color }}
+                            </div>
+                        </div>
+                        <div>
+                            <label for="{{ form.background_color.id_for_label }}" class="form-label">Fondo (Legacy)</label>
                             <div class="color-input-group">
                                 {{ form.background_color }}
-                                <span class="small text-muted">Fondo principal</span>
                             </div>
                         </div>
                     </div>
@@ -370,13 +408,9 @@
                 <div class="tab-pane fade" id="announcement-pane" role="tabpanel">
                     <div class="tab-header">
                         <h5>Configuración de Anuncios</h5>
-                        <form method="post" style="display: inline;">
-                            {% csrf_token %}
-                            <input type="hidden" name="reset_tab" value="announcement">
-                            <button type="submit" class="btn-reset-tab">
-                                <i class="bi bi-arrow-clockwise me-1"></i>Restablecer Tab
-                            </button>
-                        </form>
+                        <button type="button" class="btn-reset-tab" onclick="resetTab(this, 'announcement')">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Restablecer Tab
+                        </button>
                     </div>
 
                     <div class="form-row wide">
@@ -404,13 +438,9 @@
                 <div class="tab-pane fade" id="social-pane" role="tabpanel">
                     <div class="tab-header">
                         <h5>Enlaces a Redes Sociales</h5>
-                        <form method="post" style="display: inline;">
-                            {% csrf_token %}
-                            <input type="hidden" name="reset_tab" value="social">
-                            <button type="submit" class="btn-reset-tab">
-                                <i class="bi bi-arrow-clockwise me-1"></i>Restablecer Tab
-                            </button>
-                        </form>
+                        <button type="button" class="btn-reset-tab" onclick="resetTab(this, 'social')">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Restablecer Tab
+                        </button>
                     </div>
 
                     <div class="form-row">
@@ -448,13 +478,9 @@
                 <div class="tab-pane fade" id="seo-pane" role="tabpanel">
                     <div class="tab-header">
                         <h5>Optimización para Buscadores (SEO)</h5>
-                        <form method="post" style="display: inline;">
-                            {% csrf_token %}
-                            <input type="hidden" name="reset_tab" value="seo">
-                            <button type="submit" class="btn-reset-tab">
-                                <i class="bi bi-arrow-clockwise me-1"></i>Restablecer Tab
-                            </button>
-                        </form>
+                        <button type="button" class="btn-reset-tab" onclick="resetTab(this, 'seo')">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Restablecer Tab
+                        </button>
                     </div>
 
                     <div class="form-row wide">
@@ -469,6 +495,8 @@
                     </div>
                 </div>
             </div>
+            
+            <input type="hidden" id="reset_tab_input" name="reset_tab" value="">
 
             <!-- Footer Actions -->
             <div class="footer-actions">
@@ -484,21 +512,12 @@
 </div>
 
 <script>
-    // Mejora de UX: restablece el tab activo después de un reset
-    document.querySelectorAll('form').forEach(form => {
-        if (form.querySelector('input[name="reset_tab"]')) {
-            form.addEventListener('submit', function(e) {
-                const tabValue = this.querySelector('input[name="reset_tab"]').value;
-                // Esperar a que se recargue la página
-                setTimeout(() => {
-                    const tabButton = document.getElementById(tabValue + '-tab');
-                    if (tabButton) {
-                        const tab = new bootstrap.Tab(tabButton);
-                        tab.show();
-                    }
-                }, 100);
-            });
+    // Función para resetear un tab específico
+    function resetTab(button, tabName) {
+        if (confirm(`¿Estás seguro de que deseas restablecer el tab "${tabName}" a sus valores originales?`)) {
+            document.getElementById('reset_tab_input').value = tabName;
+            document.getElementById('config-form').submit();
         }
-    });
+    }
 </script>
 {% endblock %}

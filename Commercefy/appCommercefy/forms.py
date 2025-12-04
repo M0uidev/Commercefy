@@ -13,7 +13,16 @@ class SiteConfigurationForm(forms.ModelForm):
         model = SiteConfiguration
         fields = [
             'site_name', 'support_email', 'support_phone', 'logo',
-            'primary_color', 'secondary_color', 'accent_color', 'button_hover_color', 'text_color', 'background_color',
+            # Apariencia
+            'bg_body', 'bg_surface', 'bg_soft', 'product_card_bg',
+            'primary_color', 'primary_color_dark', 'primary_color_light',
+            'secondary_color', 'secondary_color_dark',
+            'accent_color', 'accent_color_dark',
+            'danger_color', 'danger_color_dark', 'warning_color', 'info_color', 'success_color',
+            'text_main', 'text_muted', 'text_light',
+            # Legacy
+            'button_hover_color', 'text_color', 'background_color',
+            # Redes
             'facebook_url', 'instagram_url', 'twitter_url',
             'meta_description',
             'show_announcement', 'announcement_text'
@@ -23,12 +32,37 @@ class SiteConfigurationForm(forms.ModelForm):
             'support_email': forms.EmailInput(attrs={'class': 'form-control'}),
             'support_phone': forms.TextInput(attrs={'class': 'form-control'}),
             'logo': forms.FileInput(attrs={'class': 'form-control'}),
+            
+            # Colors
+            'bg_body': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
+            'bg_surface': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
+            'bg_soft': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
+            'product_card_bg': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
+            
             'primary_color': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
+            'primary_color_dark': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
+            'primary_color_light': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
+            
             'secondary_color': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
+            'secondary_color_dark': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
+            
             'accent_color': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
+            'accent_color_dark': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
+            
+            'danger_color': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
+            'danger_color_dark': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
+            'warning_color': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
+            'info_color': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
+            'success_color': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
+            
+            'text_main': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
+            'text_muted': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
+            'text_light': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
+            
             'button_hover_color': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
             'text_color': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
             'background_color': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
+            
             'facebook_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://facebook.com/...'}),
             'instagram_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://instagram.com/...'}),
             'twitter_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://twitter.com/...'}),

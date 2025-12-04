@@ -20,15 +20,9 @@
   <link rel="stylesheet" href="{% static 'css/components/buttons.css' %}?v=5" />
   <link rel="stylesheet" href="{% static 'css/components/badges.css' %}?v=5" />
   <link rel="stylesheet" href="{% static 'css/base.css' %}?v=5" />
+  <!-- CSS Dinámico con colores de configuración -->
+  <link rel="stylesheet" href="{% url 'dynamic_theme_css' %}?v={{ site_config.updated_at|date:'U'|default:'1' }}" />
 
-  {% if site_config %}
-  <style>
-    :root {
-        {% if site_config.primary_color %}--color-primary: {{ site_config.primary_color }};{% endif %}
-        {% if site_config.secondary_color %}--color-secondary: {{ site_config.secondary_color }};{% endif %}
-    }
-  </style>
-  {% endif %}
 
   {% block extra_css %}{% endblock %}
 </head>
@@ -93,6 +87,8 @@
         {% if user.is_authenticated %}
           {% if user.is_staff or user.is_superuser or user|has_group:'admin' %}
             <a href="{% url 'dashboardadmin' %}">Dashboard admin</a>
+            <a href="{% url 'theme_editor' %}">Editor de Tema</a>
+            <a href="?edit_mode=true">Activar Edición</a>
           {% elif user|has_group:'trabajador' %}
             <a href="{% url 'dashboardtrabajador' %}">Dashboard trabajador</a>
           {% endif %}

@@ -15,6 +15,10 @@ urlpatterns = [
     path('profile/edit/', views.edit_profile, name='edit_profile'),
     # Dashboards
     path('dashboardadmin/', views.dashboardadmin, name='dashboardadmin'),
+    path('configuration/', views.site_configuration_view, name='site_configuration'),
+    path('configuration/theme-editor/', views.theme_editor_view, name='theme_editor'),
+    path('api/update-page-block/', views.update_page_block, name='update_page_block'),
+    path('api/reorder-page-blocks/', views.reorder_page_blocks, name='reorder_page_blocks'),
     path('api/dashboard-data/', views.api_dashboard_data, name='api_dashboard_data'),
     path('dashboardtrabajador/', views.dashboardtrabajador, name='dashboardtrabajador'),
     path('api/worker-dashboard-data/', views.api_worker_dashboard_data, name='api_worker_dashboard_data'),
@@ -69,4 +73,8 @@ urlpatterns = [
     path('marketing/campaign/create/', views.create_campaign, name='create_campaign'),
     # Configuración
     path('configuration/', views.site_configuration_view, name='site_configuration'),
+    path('theme.css', views.dynamic_theme_css, name='dynamic_theme_css'),
+    
+    # UI Test / Styleguide
+    path('ui-test/', views.ui_test, name='ui_test'),
 ]

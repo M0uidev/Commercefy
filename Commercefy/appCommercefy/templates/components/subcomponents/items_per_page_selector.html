@@ -1,0 +1,13 @@
+<div class="text-center mt-3 pt-3 border-top">
+    <form method="get" class="d-inline-block" id="itemsPerPageForm">
+        <input type="hidden" name="category" value="{{ current_category|default:'' }}">
+        <input type="hidden" name="sort" value="{{ current_sort|default:'' }}">
+        <label for="items" class="form-label me-2 small text-muted">Productos por página:</label>
+        <select name="items" id="items" class="form-select form-select-sm d-inline-block w-auto">
+            <option value="8" {% if items_per_page|stringformat:"s" == "8" %}selected{% endif %}>8</option>
+            <option value="16" {% if items_per_page|stringformat:"s" == "16" %}selected{% endif %}>16</option>
+            <option value="24" {% if items_per_page|stringformat:"s" == "24" %}selected{% endif %}>24</option>
+            <option value="32" {% if items_per_page|stringformat:"s" == "32" %}selected{% endif %}>32</option>
+        </select>
+    </form>
+</div>

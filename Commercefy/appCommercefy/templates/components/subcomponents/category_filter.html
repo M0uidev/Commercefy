@@ -1,0 +1,8 @@
+<div class="d-flex flex-column align-items-center mb-4">
+  <div class="d-flex flex-wrap justify-content-center gap-2" id="filterChips">
+      <a href="?category=all{% if current_sort %}&sort={{ current_sort }}{% endif %}{% if items_per_page %}&items={{ items_per_page }}{% endif %}" class="btn btn-sm {% if not current_category or current_category == 'all' %}btn-primary active{% else %}btn-outline-primary{% endif %} rounded-pill filter-chip ajax-link" data-category="all">Todos</a>
+      {% for cat in categories %}
+      <a href="?category={{ cat.slug }}{% if current_sort %}&sort={{ current_sort }}{% endif %}{% if items_per_page %}&items={{ items_per_page }}{% endif %}" class="btn btn-sm {% if current_category == cat.slug %}btn-primary active{% else %}btn-outline-primary{% endif %} rounded-pill filter-chip ajax-link" data-category="{{ cat.slug }}">{{ cat.name }}</a>
+      {% endfor %}
+  </div>
+</div>
