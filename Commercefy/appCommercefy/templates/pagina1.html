@@ -6,130 +6,326 @@
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/dashboardtrabajador.css' %}">
   <link rel="stylesheet" href="{% static 'css/pages/pagina1.css' %}">
+  {% if edit_mode %}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+  <style>
+    .sortable-ghost { opacity: 0.4; background-color: #f8f9fa; border: 2px dashed #0d6efd; }
+    .sortable-drag { cursor: grabbing; }
+    .cursor-grab { cursor: grab; }
+  </style>
+  {% endif %}
 {% endblock %}
 
 {% block content %}
-  <!-- Sección hero con gradiente -->
-  <section class="container-fluid px-0 mb-5">
-    <div class="rounded-3 p-5 text-center" style="background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-primary) 100%);">
-      <h1 class="display-4 fw-bold mb-3" style="color: var(--text-white);">Nuevas Colecciones</h1>
-      <p class="lead text-muted mb-4">Descubre lo último en tendencias!</p>
-      <a href="#ofertas" class="btn btn-pastel btn-lg px-5" style="background: white; color: var(--color-primary-dark);">Ver Ofertas</a>
-    </div>
-  </section>
-
-  <!-- Carrusel de ofertas imperdibles -->
-  {% if ofertas_imperdibles|length >= 5 %}
-  <section class="container mb-5 position-relative" id="ofertas">
-    <h2 class="h3 fw-bold mb-4">Ofertas Imperdibles</h2>
-    
-    <div class="position-relative px-4">
-      <button class="btn btn-light rounded-circle shadow position-absolute top-50 start-0 translate-middle-y z-2 d-none d-md-flex align-items-center justify-content-center" id="prevOffer" style="width: 40px; height: 40px; left: 0;">
-        <i class="bi bi-chevron-left"></i>
-      </button>
-      
-      <div class="scrolling-wrapper-flexbox py-2 d-flex flex-nowrap" id="offersCarousel">
-        {% for producto in ofertas_imperdibles|slice:":12" %}
-          <div class="card-product-carousel">
-            {% include 'partials/product_card.html' with product=producto %}
-          </div>
-        {% endfor %}
-      </div>
-
-      <button class="btn btn-light rounded-circle shadow position-absolute top-50 end-0 translate-middle-y z-2 d-none d-md-flex align-items-center justify-content-center" id="nextOffer" style="width: 40px; height: 40px; right: 0;">
-        <i class="bi bi-chevron-right"></i>
-      </button>
-    </div>
-  </section>
+  {% if user.is_staff and not edit_mode %}
+  <div class="container mt-3 text-end">
+    <a href="?edit_mode=true" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i> Editar Página</a>
+  </div>
   {% endif %}
 
-  <!-- Productos filtrables por categoría -->
-  <section class="container mb-5" id="imperdibles">
-    <div class="d-flex flex-column align-items-center mb-4">
-      <h2 class="h3 fw-bold mb-3">Productos para ti</h2>
-      <div class="d-flex flex-wrap justify-content-center gap-2" id="filterChips">
-        <a href="?category=all{% if current_sort %}&sort={{ current_sort }}{% endif %}{% if items_per_page %}&items={{ items_per_page }}{% endif %}" class="btn btn-sm {% if not current_category or current_category == 'all' %}btn-primary active{% else %}btn-outline-primary{% endif %} rounded-pill filter-chip ajax-link" data-category="all">Todos</a>
-        {% for cat in categories %}
-          <a href="?category={{ cat.slug }}{% if current_sort %}&sort={{ current_sort }}{% endif %}{% if items_per_page %}&items={{ items_per_page }}{% endif %}" class="btn btn-sm {% if current_category == cat.slug %}btn-primary active{% else %}btn-outline-primary{% endif %} rounded-pill filter-chip ajax-link" data-category="{{ cat.slug }}">{{ cat.name }}</a>
-        {% endfor %}
-      </div>
-    </div>
+  {% if edit_mode %}
+  <div class="alert alert-info d-flex justify-content-between align-items-center container mt-3">
+    <span><i class="bi bi-pencil-square"></i> Modo Edición Activado - Arrastra los bloques para reordenar</span>
+    <a href="?edit_mode=false" class="btn btn-sm btn-outline-primary">Salir</a>
+  </div>
+  {% endif %}
 
-    <div id="product-list-container">
-      {% include 'partials/product_list.html' %}
-    </div>
+  <div id="blocks-container">
+  {% for block in blocks %}
+    <div class="page-block position-relative {% if edit_mode %}border border-dashed border-primary p-2 mb-3 cursor-grab{% endif %}" data-id="{{ block.id }}">
+      {{ block.content|json_script:block.id }}
+      {% if edit_mode %}
+        <div class="position-absolute top-0 end-0 p-2 z-3 bg-white shadow-sm rounded-bottom">
+          <span class="badge bg-secondary">{{ block.get_block_type_display }}</span>
+          <button class="btn btn-sm btn-light text-primary" title="Editar" onclick="openEditModal('{{ block.id }}', '{{ block.block_type }}', '{{ block.title|escapejs }}')"><i class="bi bi-pencil"></i></button>
+          <button class="btn btn-sm btn-light text-danger" title="Eliminar"><i class="bi bi-trash"></i></button>
+        </div>
+      {% endif %}
 
-    <!-- Selector de items por página -->
-    <div class="text-center mt-3">
-        <form method="get" class="d-inline-block" id="itemsPerPageForm">
-            <input type="hidden" name="category" value="{{ current_category|default:'' }}">
-            <input type="hidden" name="sort" value="{{ current_sort|default:'' }}">
-            <label for="items" class="form-label me-2">Productos por página:</label>
-            <select name="items" id="items" class="form-select d-inline-block w-auto">
-                <option value="8" {% if items_per_page|stringformat:"s" == "8" %}selected{% endif %}>8</option>
-                <option value="16" {% if items_per_page|stringformat:"s" == "16" %}selected{% endif %}>16</option>
-                <option value="24" {% if items_per_page|stringformat:"s" == "24" %}selected{% endif %}>24</option>
-                <option value="32" {% if items_per_page|stringformat:"s" == "32" %}selected{% endif %}>32</option>
-            </select>
-        </form>
-    </div>
-  </section>
+      {% if block.block_type == 'hero' %}
+        {% include 'components/hero_section.html' with title=block.title subtitle=block.content.subtitle button_text=block.content.button_text button_link=block.content.button_link %}
 
-  <!-- Tarjetas de información: Ayuda, Pedidos, Devoluciones, Tiendas -->
-  <section class="container mb-5">
-    <div class="row g-4">
-      <!-- Item 1: Ayuda -->
-      <div class="col-12 col-sm-6 col-lg-3">
-        <a href="#" class="d-flex align-items-center text-decoration-none text-dark h-100 p-3 border rounded shadow-sm bg-white info-card-hover">
-          <div class="flex-shrink-0 me-3" style="color: var(--color-primary-dark);">
-            <svg class="icon icon--chat_bubble" width="44" height="44" viewBox="0 0 16 16" aria-hidden="true" focusable="false" role="presentation"><path fill="currentColor" d="M11.3 13.02a6 6 0 111.72-1.72L14 14l-2.7-.98zm2.82-1.62a7 7 0 10-2.72 2.72l2.26.82a1 1 0 001.28-1.28l-.82-2.26z"></path>
-            <path fill="currentColor" d="M4.9 9.16c.52 0 .86-.36.86-.85 0-.5-.34-.85-.87-.85-.52 0-.86.36-.86.85 0 .5.34.85.86.85zM7.88 9.16c.53 0 .87-.36.87-.85 0-.5-.34-.85-.87-.85-.52 0-.87.36-.87.85 0 .5.35.85.87.85zM10.87 9.16c.52 0 .87-.36.87-.85 0-.5-.35-.85-.87-.85s-.87.36-.87.85c0 .5.35.85.87.85z"></path></svg>
-          </div>
-          <div>
-            <h6 class="mb-0 fw-bold">¿Necesitas ayuda?</h6>
-            <small class="text-muted">Contacta a un agente</small>
-          </div>
-        </a>
-      </div>
-      <!-- Item 2: Compras -->
-      <div class="col-12 col-sm-6 col-lg-3">
-        <a href="{% url 'profile' %}" class="d-flex align-items-center text-decoration-none text-dark h-100 p-3 border rounded shadow-sm bg-white info-card-hover">
-          <div class="flex-shrink-0 me-3" style="color: var(--color-primary-dark);">
-            <svg class="icon icon--box" width="44" height="44" viewBox="0 0 16 16" aria-hidden="true" focusable="false" role="presentation"><path fill="currentColor" d="M14.41 3.37L8.27 1.41a1 1 0 00-.61 0L1.52 3.37a1 1 0 00-.7.95v7.86c0 .41.25.78.63.93l6.14 2.46c.24.1.5.1.75 0l6.14-2.46a1 1 0 00.62-.93V4.32a1 1 0 00-.69-.95zM7.96 2.36l6.05 1.93-2.7.9L5.35 3.2l2.63-.84zm-.46 12.1l-5.68-2.28V5.3L7.5 7.2v7.26zM8 6.3L1.96 4.28l2.58-.82 5.99 2L8 6.3zm6.1 5.89l-5.6 2.24V7.19l5.6-1.87v6.87z"></path></svg>
-          </div>
-          <div>
-            <h6 class="mb-0 fw-bold">Revisa tus compras</h6>
-            <small class="text-muted">Historial de pedido y despacho</small>
-          </div>
-        </a>
-      </div>
-      <!-- Item 3: Devoluciones -->
-      <div class="col-12 col-sm-6 col-lg-3">
-        <a href="#" class="d-flex align-items-center text-decoration-none text-dark h-100 p-3 border rounded shadow-sm bg-white info-card-hover">
-          <div class="flex-shrink-0 me-3" style="color: var(--color-primary-dark);">
-            <svg class="icon icon--return" width="44" height="44" viewBox="0 0 16 16" aria-hidden="true" focusable="false" role="presentation"><path fill="currentColor" d="M9 .5a.5.5 0 000 1h1a4.5 4.5 0 110 9H2.2l3.15-3.15a.5.5 0 10-.7-.7l-4 4a.5.5 0 000 .7l4 4a.5.5 0 00.7-.7L2.21 11.5H10a5.5 5.5 0 100-11H9z"></path></svg>
-          </div>
-          <div>
-            <h6 class="mb-0 fw-bold">Cambios y devoluciones</h6>
-            <small class="text-muted">Todo lo que necesitas saber</small>
-          </div>
-        </a>
-      </div>
-      <!-- Item 4: Tiendas -->
-      <div class="col-12 col-sm-6 col-lg-3">
-        <a href="#" class="d-flex align-items-center text-decoration-none text-dark h-100 p-3 border rounded shadow-sm bg-white info-card-hover">
-          <div class="flex-shrink-0 me-3" style="color: var(--color-primary-dark);">
-            <svg class="icon icon--map_pin" width="44" height="44" viewBox="0 0 16 16" aria-hidden="true" focusable="false" role="presentation"><path fill="currentColor" d="M6.72 14.63L7.5 14l.78.63-.78.96-.78-.96zm1.41-1.44L7.5 14s-.25-.3-.63-.81C5.63 11.54 3 7.8 3 5.79 3 3.14 5.01 1 7.5 1S12 3.14 12 5.79c0 2.02-2.63 5.75-3.87 7.4zm.15 1.44L7.5 14l-.78.63-.01-.02-.04-.05a26.53 26.53 0 01-.67-.87c-.43-.58-1.01-1.37-1.59-2.26A24.32 24.32 0 012.8 8.62 7.07 7.07 0 012 5.79C2 2.65 4.4 0 7.5 0S13 2.65 13 5.79c0 .9-.36 1.9-.8 2.83-.45.95-1.04 1.93-1.61 2.81a43.67 43.67 0 01-2.26 3.13l-.04.05v.01h-.01z" fill-rule="evenodd"></path>
-            <path fill="currentColor" d="M7.5 7a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm0 1a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" fill-rule="evenodd"></path></svg>
-          </div>
-          <div>
-            <h6 class="mb-0 fw-bold">Visita nuestra tienda</h6>
-            <small class="text-muted">Encuentra tu tienda más cercana</small>
-          </div>
-        </a>
+      {% elif block.block_type == 'offers_carousel' %}
+        <!-- Carrusel de ofertas imperdibles -->
+        {% include 'components/offers_carousel_section.html' with title=block.title products=ofertas_imperdibles %}
+
+      {% elif block.block_type == 'product_list' %}
+        <!-- Productos filtrables por categoría -->
+        {% include 'components/product_filter_section.html' with use_card_wrapper=True title=block.title config=block.content %}
+
+      {% elif block.block_type == 'info_cards' %}
+        <!-- Tarjetas de información: Ayuda, Pedidos, Devoluciones, Tiendas -->
+        {% include 'components/info_cards_section.html' with use_card_wrapper=False %}
+
+      {% elif block.block_type == 'html' %}
+        <div class="container mb-5">
+          {{ block.content.html|safe }}
+        </div>
+      {% endif %}
+    </div>
+  {% endfor %}
+
+  </div><!-- End blocks-container -->
+
+  <!-- Edit Modal -->
+  <div class="modal fade" id="editBlockModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Editar Bloque</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editBlockForm">
+            <input type="hidden" id="editBlockId" name="block_id">
+            <div class="mb-3">
+              <label for="editBlockTitle" class="form-label">Título</label>
+              <input type="text" class="form-control" id="editBlockTitle" name="title">
+            </div>
+            <div id="editBlockContentFields">
+              <!-- Dynamic fields will be injected here -->
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" onclick="saveBlockChanges()">Guardar Cambios</button>
+        </div>
       </div>
     </div>
-  </section>
+  </div>
+
+  {% if edit_mode %}
+  {{ default_cards|json_script:"default-cards-data" }}
+  {% endif %}
+
+  <script>
+    {% if edit_mode %}
+    const DEFAULT_INFO_CARDS = JSON.parse(document.getElementById('default-cards-data').textContent);
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        var el = document.getElementById('blocks-container');
+        var sortable = Sortable.create(el, {
+            animation: 150,
+            draggable: ".page-block",
+            ghostClass: 'sortable-ghost',
+            onEnd: function (evt) {
+                var order = sortable.toArray();
+                fetch('{% url "reorder_page_blocks" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({order: order})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if(data.status !== 'success') alert('Error al reordenar');
+                });
+            }
+        });
+    });
+    {% endif %}
+
+    function openEditModal(blockId, blockType, blockTitle) {
+        document.getElementById('editBlockId').value = blockId;
+        document.getElementById('editBlockTitle').value = blockTitle;
+        
+        const contentScript = document.getElementById(blockId);
+        const content = contentScript ? JSON.parse(contentScript.textContent) : {};
+        
+        const contentFields = document.getElementById('editBlockContentFields');
+        contentFields.innerHTML = ''; // Clear previous fields
+
+        if (blockType === 'hero') {
+            contentFields.innerHTML = `
+                <div class="mb-3">
+                    <label class="form-label">Subtítulo</label>
+                    <input type="text" class="form-control" name="subtitle" value="${content.subtitle || ''}" placeholder="Descubre lo último...">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Texto Botón</label>
+                    <input type="text" class="form-control" name="button_text" value="${content.button_text || ''}" placeholder="Ver Ofertas">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Enlace Botón</label>
+                    <input type="text" class="form-control" name="button_link" value="${content.button_link || ''}" placeholder="#ofertas">
+                </div>
+            `;
+        } else if (blockType === 'info_cards') {
+             let cards = content.cards || DEFAULT_INFO_CARDS;
+             
+             let cardsHTML = `
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Tarjetas (Arrastra para reordenar)</label>
+                    <div id="cards-list" class="list-group">
+             `;
+             
+             cards.forEach((card, index) => {
+                 cardsHTML += `
+                    <div class="list-group-item d-flex align-items-center" data-index="${index}">
+                        <i class="bi bi-grip-vertical me-2 text-muted handle cursor-grab"></i>
+                        <div class="flex-grow-1 ms-2">
+                            <div class="fw-bold">${card.title}</div>
+                            <small class="text-muted">${card.subtitle}</small>
+                        </div>
+                        <input type="hidden" name="card_id_${index}" value="${card.id}">
+                        <input type="hidden" name="card_icon_${index}" value="${card.icon}">
+                        <input type="hidden" name="card_title_${index}" value="${card.title}">
+                        <input type="hidden" name="card_subtitle_${index}" value="${card.subtitle}">
+                        <input type="hidden" name="card_link_${index}" value="${card.link}">
+                    </div>
+                 `;
+             });
+             
+             cardsHTML += `</div></div>`;
+             contentFields.innerHTML = cardsHTML;
+             
+             setTimeout(() => {
+                 new Sortable(document.getElementById('cards-list'), {
+                     animation: 150,
+                     handle: '.handle',
+                     ghostClass: 'bg-light'
+                 });
+             }, 100);
+
+        } else if (blockType === 'product_list') {
+             // Subcomponents Reordering UI
+             let layout = content.layout || ['category_filter', 'product_list', 'items_per_page_selector'];
+             
+             let subcomponentsHTML = `
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Subcomponentes (Arrastra para reordenar)</label>
+                    <div id="subcomponents-list" class="list-group">
+             `;
+             
+             const labels = {
+                 'category_filter': 'Filtro de Categorías',
+                 'product_list': 'Lista de Productos',
+                 'items_per_page_selector': 'Selector Paginación'
+             };
+
+             layout.forEach(comp => {
+                 subcomponentsHTML += `
+                    <div class="list-group-item d-flex justify-content-between align-items-center" data-id="${comp}">
+                        <span><i class="bi bi-grip-vertical me-2 text-muted"></i> ${labels[comp] || comp}</span>
+                        ${comp !== 'product_list' ? `
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="show_${comp}" ${content['show_' + comp] !== false ? 'checked' : ''}>
+                        </div>` : ''}
+                    </div>
+                 `;
+             });
+             
+             subcomponentsHTML += `</div></div>
+                <div class="mb-3">
+                    <label class="form-label">Items por página (Default)</label>
+                    <select class="form-select" name="default_items_per_page">
+                        <option value="8" ${content.default_items_per_page == 8 ? 'selected' : ''}>8</option>
+                        <option value="16" ${content.default_items_per_page == 16 ? 'selected' : ''}>16</option>
+                        <option value="24" ${content.default_items_per_page == 24 ? 'selected' : ''}>24</option>
+                    </select>
+                </div>
+             `;
+             
+             contentFields.innerHTML = subcomponentsHTML;
+             
+             // Initialize Sortable for subcomponents
+             setTimeout(() => {
+                 new Sortable(document.getElementById('subcomponents-list'), {
+                     animation: 150,
+                     handle: '.list-group-item',
+                     ghostClass: 'bg-light'
+                 });
+             }, 100);
+        }
+        
+        const modal = new bootstrap.Modal(document.getElementById('editBlockModal'));
+        modal.show();
+    }
+
+    function saveBlockChanges() {
+        const form = document.getElementById('editBlockForm');
+        const blockId = document.getElementById('editBlockId').value;
+        const title = document.getElementById('editBlockTitle').value;
+        
+        const formData = new FormData(form);
+        const content = {};
+        
+        // Convert FormData to JSON object for content fields
+        for (let [key, value] of formData.entries()) {
+            if (key !== 'block_id' && key !== 'title' && !key.startsWith('show_')) {
+                content[key] = value;
+            }
+        }
+        
+        // Handle subcomponents layout and visibility
+        const subList = document.getElementById('subcomponents-list');
+        const cardsList = document.getElementById('cards-list');
+        
+        if (subList) {
+            const layout = [];
+            subList.querySelectorAll('.list-group-item').forEach(item => {
+                const compId = item.getAttribute('data-id');
+                layout.push(compId);
+                
+                // Check visibility toggle if exists
+                const toggle = item.querySelector('input[type="checkbox"]');
+                if (toggle) {
+                    content['show_' + compId] = toggle.checked;
+                }
+            });
+            content['layout'] = layout;
+        } else if (cardsList) {
+            const cards = [];
+            cardsList.querySelectorAll('.list-group-item').forEach(item => {
+                const card = {
+                    id: item.querySelector(`input[name^="card_id_"]`).value,
+                    icon: item.querySelector(`input[name^="card_icon_"]`).value,
+                    title: item.querySelector(`input[name^="card_title_"]`).value,
+                    subtitle: item.querySelector(`input[name^="card_subtitle_"]`).value,
+                    link: item.querySelector(`input[name^="card_link_"]`).value
+                };
+                cards.push(card);
+            });
+            content['cards'] = cards;
+        } else {
+            // Fallback for other blocks (checkboxes)
+            const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                content[cb.name] = cb.checked;
+            });
+        }
+
+        const payload = {
+            block_id: blockId,
+            title: title,
+            content: content
+        };
+
+        fetch('{% url "update_page_block" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                location.reload(); // Reload to see changes
+            } else {
+                alert('Error al guardar: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error de conexión');
+        });
+    }
+  </script>
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
