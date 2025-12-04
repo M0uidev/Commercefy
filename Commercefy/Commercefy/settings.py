@@ -100,7 +100,7 @@ CHANNEL_LAYERS = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'multitienda',
+        'NAME': 'commercefy',
         'USER': 'root',
         'PASSWORD': '',
         'HOST': '127.0.0.1',

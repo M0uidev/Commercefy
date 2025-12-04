@@ -8,7 +8,7 @@ class Category(models.Model):
     slug = models.CharField(max_length=120, unique=True, verbose_name="Slug")
 
     class Meta:
-        db_table = 'appcommercefy_category'
+        db_table = 'category'
         verbose_name = "Categoría"
         verbose_name_plural = "Categorías"
 
@@ -21,7 +21,7 @@ class Customer(models.Model):
     name = models.CharField(max_length=150, verbose_name="Nombre")
 
     class Meta:
-        db_table = 'appcommercefy_customer'
+        db_table = 'customer'
         verbose_name = "Cliente"
         verbose_name_plural = "Clientes"
 
@@ -49,7 +49,7 @@ class Product(models.Model):
     has_sizes = models.BooleanField(default=False, verbose_name="Tiene Tallas")
 
     class Meta:
-        db_table = 'appcommercefy_product'
+        db_table = 'product'
         verbose_name = "Producto"
         verbose_name_plural = "Productos"
 
@@ -89,7 +89,7 @@ class ProductDetail(models.Model):
     capacity_l = models.PositiveIntegerField(blank=True, null=True, verbose_name="Capacidad (L)")
 
     class Meta:
-        db_table = 'appcommercefy_productdetail'
+        db_table = 'productdetail'
         verbose_name = "Detalle de Producto"
         verbose_name_plural = "Detalles de Productos"
 
@@ -125,7 +125,7 @@ class ProductSize(models.Model):
     label = models.CharField(max_length=20, verbose_name="Etiqueta")
 
     class Meta:
-        db_table = 'appcommercefy_productsize'
+        db_table = 'productsize'
         unique_together = (('product', 'label'),)
         verbose_name = "Talla de Producto"
         verbose_name_plural = "Tallas de Productos"
@@ -145,7 +145,7 @@ class ProductSpec(models.Model):
     text = models.CharField(max_length=200, verbose_name="Especificación")
 
     class Meta:
-        db_table = 'appcommercefy_productspec'
+        db_table = 'productspec'
         verbose_name = "Especificación de Producto"
         verbose_name_plural = "Especificaciones de Productos"
 
@@ -164,7 +164,7 @@ class ProductCare(models.Model):
     text = models.CharField(max_length=200, verbose_name="Cuidado")
 
     class Meta:
-        db_table = 'appcommercefy_productcare'
+        db_table = 'productcare'
         verbose_name = "Cuidado de Producto"
         verbose_name_plural = "Cuidados de Productos"
 
@@ -184,7 +184,7 @@ class ProductBreadcrumb(models.Model):
     label = models.CharField(max_length=60, verbose_name="Etiqueta")
 
     class Meta:
-        db_table = 'appcommercefy_productbreadcrumb'
+        db_table = 'productbreadcrumb'
         ordering = ["position"]
         verbose_name = "Miga de Pan"
         verbose_name_plural = "Migas de Pan"
@@ -238,7 +238,7 @@ class Order(models.Model):
     shipping_region = models.CharField(max_length=100, blank=True, verbose_name="Región")
 
     class Meta:
-        db_table = 'appcommercefy_order'
+        db_table = 'order'
         verbose_name = "Pedido"
         verbose_name_plural = "Pedidos"
 
@@ -273,7 +273,7 @@ class OrderItem(models.Model):
     is_reward = models.BooleanField(default=False, verbose_name="Es Recompensa")
 
     class Meta:
-        db_table = 'appcommercefy_orderitem'
+        db_table = 'orderitem'
         verbose_name = "Ítem de Pedido"
         verbose_name_plural = "Ítems de Pedidos"
 
@@ -295,6 +295,7 @@ class UserProfile(models.Model):
     is_verified = models.BooleanField(default=False, verbose_name="Verificado")
 
     class Meta:
+        db_table = 'userprofile'
         verbose_name = "Perfil de Usuario"
         verbose_name_plural = "Perfiles de Usuarios"
 
@@ -313,6 +314,7 @@ class Coupon(models.Model):
     batch_name = models.CharField(max_length=100, blank=True, null=True, verbose_name="Lote / Grupo") # Added batch_name
 
     class Meta:
+        db_table = 'coupon'
         verbose_name = "Cupón"
         verbose_name_plural = "Cupones"
 
@@ -359,6 +361,7 @@ class UserCoupon(models.Model):
     is_used = models.BooleanField(default=False, verbose_name="Usado")
 
     class Meta:
+        db_table = 'usercoupon'
         verbose_name = "Cupón de Usuario"
         verbose_name_plural = "Cupones de Usuarios"
         unique_together = ('user', 'coupon')
@@ -375,6 +378,7 @@ class BulkOffer(models.Model):
     active = models.BooleanField(default=True, verbose_name="Activa")
 
     class Meta:
+        db_table = 'bulkoffer'
         verbose_name = "Oferta Masiva"
         verbose_name_plural = "Ofertas Masivas"
 
@@ -403,6 +407,7 @@ class PointReward(models.Model):
     stock = models.PositiveIntegerField(default=0, verbose_name="Stock Disponible")
     
     class Meta:
+        db_table = 'pointreward'
         verbose_name = "Recompensa por Puntos"
         verbose_name_plural = "Recompensas por Puntos"
 
@@ -441,6 +446,7 @@ class RedemptionHistory(models.Model):
     redeemed_at = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Canje")
     
     class Meta:
+        db_table = 'redemptionhistory'
         verbose_name = "Historial de Canje"
         verbose_name_plural = "Historial de Canjes"
         ordering = ['-redeemed_at']
@@ -463,6 +469,9 @@ class MarketingTemplate(models.Model):
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'marketingtemplate'
 
     def __str__(self):
         return self.name
@@ -489,6 +498,9 @@ class MarketingCampaign(models.Model):
     # Destinatarios (simplificado: todos los usuarios o lógica futura de segmentos)
     # En un sistema real, aquí iría una relación ManyToMany o un filtro JSON.
     
+    class Meta:
+        db_table = 'marketingcampaign'
+
     def __str__(self):
         return f"{self.name} ({self.get_status_display()})"
 
@@ -499,6 +511,9 @@ class CampaignLog(models.Model):
     sent_at = models.DateTimeField(auto_now_add=True)
     coupon_code = models.CharField(max_length=50, blank=True, null=True)
     opened = models.BooleanField(default=False) # Para tracking futuro (pixel)
+
+    class Meta:
+        db_table = 'campaignlog'
 
     def __str__(self):
         return f"Log: {self.campaign.name} -> {self.user.username}"
