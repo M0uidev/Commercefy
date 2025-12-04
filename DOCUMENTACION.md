@@ -1496,3 +1496,45 @@ bootstrap.Modal.getInstance(element).hide();
 - **Actualizaciones**: Siempre se actualiza PRODUCTS[] localmente antes de rerenderizar
 - **Validaciones**: Cliente (HTML5 required, JS custom) + Server
 - **Seguridad**: CSRF token en todos los POST, atributos required en inputs
+
+---
+
+## 21. Configuración del Sitio (SiteConfiguration)
+
+### Descripción General
+Sistema de configuración global que permite personalizar la identidad de la marca, apariencia y SEO desde el panel de administración sin modificar código.
+
+### Modelo: `SiteConfiguration`
+Modelo Singleton (solo permite una instancia) en `appCommercefy/models.py`.
+
+**Campos Principales**:
+- **Identidad**: `site_name`, `logo`, `support_email`, `support_phone`
+- **Apariencia**: `primary_color`, `secondary_color` (Hexadecimal)
+- **Redes Sociales**: `facebook_url`, `instagram_url`, `twitter_url`
+- **SEO**: `meta_description`
+- **Anuncios**: `show_announcement`, `announcement_text`
+
+### Context Processor: `site_branding`
+Inyecta la configuración en todos los templates automáticamente.
+- Archivo: `appCommercefy/context_processors.py`
+- Variable global: `{{ site_config }}`
+- Variables legacy (compatibilidad): `{{ site_name }}`, `{{ support_email }}`, `{{ site_logo_url }}`
+
+### Panel de Administración
+- **URL**: `/configuration/` (Accesible desde Navbar > Configuración para Staff/Admin)
+- **Vista**: `site_configuration_view` en `views.py`
+- **Template**: `site_configuration.html`
+- **Características**:
+  - Formulario con previsualización de logo actual
+  - Selectores de color nativos
+  - Validación de permisos (solo staff/admin)
+
+### Integración en Templates
+- **Base (`base.html`)**:
+  - Título dinámico y meta description
+  - Inyección de variables CSS (`:root`) para colores personalizados
+  - Barra de anuncios condicional
+  - Iconos de redes sociales condicionales en footer
+- **Correos y PDFs**:
+  - Usan `site_name` y datos de contacto dinámicos para mantener consistencia de marca.
+

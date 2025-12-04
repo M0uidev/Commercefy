@@ -114,11 +114,11 @@
     <table class="header-container">
         <tr>
             <td style="border:none; padding:0;">
-                <div class="company-name">MultiTienda</div>
+                <div class="company-name">{{ site_name }}</div>
                 <div class="company-details">
                     Av. La Plaza 6767<br>
                     Santiago, Chile<br>
-                    contacto@multitienda.cl | +56 9 8837 6786
+                    {{ support_email }} | {{ support_phone }}
                 </div>
             </td>
             <td style="border:none; padding:0; text-align:right;">
@@ -200,7 +200,7 @@
 
     <!-- Pie de página -->
     <div id="footerContent" class="footer">
-        <p>¡Gracias por tu compra en MultiTienda!</p>
+        <p>¡Gracias por tu compra en {{ site_name }}!</p>
         <p>Para dudas o consultas, contáctanos indicando tu número de pedido.</p>
     </div>
 </body>

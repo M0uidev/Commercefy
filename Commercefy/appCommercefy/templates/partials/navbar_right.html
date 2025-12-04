@@ -11,6 +11,7 @@
     </a>
     <a href="{% url 'stock' %}" class="nav-link-custom"><i class="bi bi-box-seam"></i><span class="nav-text">Stock</span></a>
     <a href="{% url 'marketing_dashboard' %}" class="nav-link-custom"><i class="bi bi-tags"></i><span class="nav-text">Marketing</span></a>
+    <a href="{% url 'site_configuration' %}" class="nav-link-custom"><i class="bi bi-gear"></i><span class="nav-text">Configuración</span></a>
     <a href="{% url 'logout' %}" class="nav-link-custom"><i class="bi bi-box-arrow-right"></i><span class="nav-text">Salir</span></a>
   {% elif user|has_group:'trabajador' %}
     <a href="{% url 'dashboardtrabajador' %}" class="nav-link-custom"><i class="bi bi-speedometer2"></i><span class="nav-text">Dashboard</span></a>

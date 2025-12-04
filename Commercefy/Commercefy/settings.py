@@ -82,6 +82,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'appCommercefy.context_processors.pending_orders_count',
+                'appCommercefy.context_processors.site_branding',
             ],
         },
     },
@@ -155,6 +156,9 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / "appCommercefy" / "static",
 ]
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Configuración para Gmail
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

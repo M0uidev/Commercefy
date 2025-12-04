@@ -48,7 +48,8 @@ from .models import (
     UserCoupon,
     MarketingTemplate,
     MarketingCampaign,
-    CampaignLog
+    CampaignLog,
+    SiteConfiguration
 )
 from .forms import CouponForm, BulkDiscountForm, CouponGenerationForm # Added Forms
 from django.contrib import messages # Added messages
@@ -2407,7 +2408,12 @@ def print_shipping_label(request, order_id):
     p.setFont("Helvetica-Bold", 10)
     p.drawString(x_start + 5*mm, y_start + label_h - 38*mm, "REMITENTE:")
     p.setFont("Helvetica", 10)
-    p.drawString(x_start + 5*mm, y_start + label_h - 43*mm, "MultiTienda")
+
+    # Get site config
+    site_config = SiteConfiguration.objects.first()
+    site_name = site_config.site_name if site_config else "Multitienda"
+
+    p.drawString(x_start + 5*mm, y_start + label_h - 43*mm, site_name)
     p.drawString(x_start + 5*mm, y_start + label_h - 48*mm, "Av. Principal 123")
     p.drawString(x_start + 5*mm, y_start + label_h - 53*mm, "Santiago, RM")
     
@@ -2625,3 +2631,73 @@ def create_campaign(request):
         return redirect(f"{reverse('marketing_dashboard')}?tab=templates")
     
     return redirect("marketing_dashboard")
+
+
+@login_required
+@user_passes_test(lambda u: u.is_staff or u.groups.filter(name='admin').exists())
+def site_configuration_view(request):
+    """Vista para editar la configuración del sitio con soporte para reset por tab"""
+    config = SiteConfiguration.objects.first()
+    if not config:
+        config = SiteConfiguration() # Create in memory if not exists, will be saved on POST
+
+    # Obtener valores originales para comparación
+    original_values = {
+        'brand': {
+            'site_name': 'Multitienda',
+            'logo': None,
+        },
+        'contact': {
+            'support_email': 'contacto@multitienda.cl',
+            'support_phone': '+56 9 8837 6786',
+        },
+        'appearance': {
+            'primary_color': '#3b84f8',
+            'secondary_color': '#9df38b',
+            'accent_color': '#ff6b6b',
+            'button_hover_color': '#2c5cc0',
+            'text_color': '#1a1a1a',
+            'background_color': '#ffffff',
+        },
+        'announcement': {
+            'show_announcement': False,
+            'announcement_text': '',
+        },
+        'social': {
+            'facebook_url': '',
+            'instagram_url': '',
+            'twitter_url': '',
+        },
+        'seo': {
+            'meta_description': '',
+        }
+    }
+
+    if request.method == 'POST':
+        from .forms import SiteConfigurationForm
+        
+        # Revisar si es un reset de tab
+        reset_tab = request.POST.get('reset_tab')
+        if reset_tab and reset_tab in original_values:
+            # Resetear solo los campos del tab especificado
+            tab_defaults = original_values[reset_tab]
+            for field_name, default_value in tab_defaults.items():
+                setattr(config, field_name, default_value)
+            config.save()
+            messages.success(request, f"Tab '{reset_tab}' restablecido a valores originales.")
+            return redirect('site_configuration')
+        
+        # Procesar cambios normales
+        form = SiteConfigurationForm(request.POST, request.FILES, instance=config)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Configuración actualizada correctamente.")
+            return redirect('site_configuration')
+        else:
+            messages.error(request, "Error al actualizar la configuración.")
+    else:
+        from .forms import SiteConfigurationForm
+        form = SiteConfigurationForm(instance=config)
+
+    return render(request, 'site_configuration.html', {'form': form})
+

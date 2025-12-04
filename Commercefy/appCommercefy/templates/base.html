@@ -5,7 +5,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %}Multitienda{% endblock %}</title>
+  <title>{% block title %}{{ site_name }}{% endblock %}</title>
+  {% if site_config.meta_description %}
+  <meta name="description" content="{{ site_config.meta_description }}">
+  {% endif %}
   
   <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}?v=3" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
@@ -18,14 +21,28 @@
   <link rel="stylesheet" href="{% static 'css/components/badges.css' %}?v=5" />
   <link rel="stylesheet" href="{% static 'css/base.css' %}?v=5" />
 
+  {% if site_config %}
+  <style>
+    :root {
+        {% if site_config.primary_color %}--color-primary: {{ site_config.primary_color }};{% endif %}
+        {% if site_config.secondary_color %}--color-secondary: {{ site_config.secondary_color }};{% endif %}
+    }
+  </style>
+  {% endif %}
+
   {% block extra_css %}{% endblock %}
 </head>
 <body>
+  {% if site_config.show_announcement and site_config.announcement_text %}
+  <div class="bg-primary text-white text-center py-2 small fw-bold">
+    {{ site_config.announcement_text }}
+  </div>
+  {% endif %}
   <header>
     <nav class="navbar-custom" aria-label="Principal">
       <a href="{% url 'index' %}" class="brand-logo">
         <i class="bi bi-shop-window"></i>
-        <span>Multitienda</span>
+        <span>{{ site_name }}</span>
       </a>
       
       {% block nav_left %}{% endblock %}
@@ -97,12 +114,18 @@
     <div class="container">
       <div class="row g-4 text-start">
         <div class="col-lg-4 col-md-6">
-          <h5 class="fw-bold mb-3" style="color: var(--color-primary-dark);">Multitienda</h5>
+          <h5 class="fw-bold mb-3" style="color: var(--color-primary-dark);">{{ site_name }}</h5>
           <p class="text-muted small">Tu tienda de confianza para encontrar lo mejor en tecnología, hogar y moda. Calidad y estilo en un solo lugar.</p>
           <div class="d-flex gap-3 mt-3">
-            <a href="#" class="text-muted fs-5"><i class="bi bi-facebook"></i></a>
-            <a href="#" class="text-muted fs-5"><i class="bi bi-instagram"></i></a>
-            <a href="#" class="text-muted fs-5"><i class="bi bi-twitter-x"></i></a>
+            {% if site_config.facebook_url %}
+            <a href="{{ site_config.facebook_url }}" target="_blank" class="text-muted fs-5"><i class="bi bi-facebook"></i></a>
+            {% endif %}
+            {% if site_config.instagram_url %}
+            <a href="{{ site_config.instagram_url }}" target="_blank" class="text-muted fs-5"><i class="bi bi-instagram"></i></a>
+            {% endif %}
+            {% if site_config.twitter_url %}
+            <a href="{{ site_config.twitter_url }}" target="_blank" class="text-muted fs-5"><i class="bi bi-twitter-x"></i></a>
+            {% endif %}
           </div>
         </div>
         <div class="col-lg-2 col-md-6">
@@ -125,14 +148,14 @@
         <div class="col-lg-4 col-md-6">
           <h6 class="fw-bold mb-3">Contacto</h6>
           <ul class="list-unstyled text-muted small d-flex flex-column gap-2">
-            <li><i class="bi bi-envelope me-2"></i> contacto@multitienda.cl</li>
-            <li><i class="bi bi-telephone me-2"></i> +56 9 1234 5678</li>
+            <li><i class="bi bi-envelope me-2"></i> {{ support_email }}</li>
+            <li><i class="bi bi-telephone me-2"></i> {{ support_phone }}</li>
             <li><i class="bi bi-geo-alt me-2"></i> Av. Principal 123, Santiago</li>
           </ul>
         </div>
       </div>
       <div class="border-top mt-5 pt-4 text-center text-muted small">
-        <p class="mb-0">© 2025 Multitienda. Todos los derechos reservados.</p>
+        <p class="mb-0">© {% now "Y" %} {{ site_name }}. Todos los derechos reservados.</p>
       </div>
     </div>
   </footer>

@@ -2,10 +2,40 @@
 Formularios de la aplicación
 """
 from django import forms
-from .models import Coupon, Product
+from .models import Coupon, Product, SiteConfiguration
 from django.utils import timezone
 import random
 import string
+
+class SiteConfigurationForm(forms.ModelForm):
+    """Formulario para configuración del sitio"""
+    class Meta:
+        model = SiteConfiguration
+        fields = [
+            'site_name', 'support_email', 'support_phone', 'logo',
+            'primary_color', 'secondary_color', 'accent_color', 'button_hover_color', 'text_color', 'background_color',
+            'facebook_url', 'instagram_url', 'twitter_url',
+            'meta_description',
+            'show_announcement', 'announcement_text'
+        ]
+        widgets = {
+            'site_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'support_email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'support_phone': forms.TextInput(attrs={'class': 'form-control'}),
+            'logo': forms.FileInput(attrs={'class': 'form-control'}),
+            'primary_color': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
+            'secondary_color': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
+            'accent_color': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
+            'button_hover_color': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
+            'text_color': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
+            'background_color': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
+            'facebook_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://facebook.com/...'}),
+            'instagram_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://instagram.com/...'}),
+            'twitter_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://twitter.com/...'}),
+            'meta_description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'show_announcement': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'announcement_text': forms.TextInput(attrs={'class': 'form-control'}),
+        }
 
 class CouponForm(forms.ModelForm):
     """Formulario para crear/editar cupones"""

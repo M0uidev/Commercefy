@@ -41,7 +41,11 @@ class EmailService:
         """
         Envía el correo de verificación de cuenta al usuario.
         """
-        subject = "Verifica tu cuenta en MultiTienda"
+        from ..models import SiteConfiguration
+        config = SiteConfiguration.objects.first()
+        site_name = config.site_name if config else "Multitienda"
+
+        subject = f"Verifica tu cuenta en {site_name}"
         context = {
             'user': user,
             'verification_url': verification_url,

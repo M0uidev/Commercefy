@@ -518,3 +518,50 @@ class CampaignLog(models.Model):
     def __str__(self):
         return f"Log: {self.campaign.name} -> {self.user.username}"
 
+
+class SiteConfiguration(models.Model):
+    """Modelo Singleton para configuración del sitio"""
+    site_name = models.CharField(max_length=100, default="Multitienda", verbose_name="Nombre del Sitio")
+    support_email = models.EmailField(default="contacto@multitienda.cl", verbose_name="Email de Soporte")
+    support_phone = models.CharField(max_length=20, default="+56 9 8837 6786", verbose_name="Teléfono de Soporte")
+    logo = models.ImageField(upload_to='site_config/', blank=True, null=True, verbose_name="Logo del Sitio")
+    
+    # Apariencia
+    primary_color = models.CharField(max_length=7, default="#3b84f8", verbose_name="Color Primario", help_text="Formato HEX (ej: #3b84f8)")
+    secondary_color = models.CharField(max_length=7, default="#9df38b", verbose_name="Color Secundario", help_text="Formato HEX (ej: #9df38b)")
+    accent_color = models.CharField(max_length=7, default="#ff6b6b", verbose_name="Color de Acentos", help_text="Formato HEX (ej: #ff6b6b)")
+    button_hover_color = models.CharField(max_length=7, default="#2c5cc0", verbose_name="Color Hover de Botones", help_text="Formato HEX (ej: #2c5cc0)")
+    text_color = models.CharField(max_length=7, default="#1a1a1a", verbose_name="Color de Texto", help_text="Formato HEX (ej: #1a1a1a)")
+    background_color = models.CharField(max_length=7, default="#ffffff", verbose_name="Color de Fondo", help_text="Formato HEX (ej: #ffffff)")
+    
+    # Redes Sociales
+    facebook_url = models.URLField(blank=True, verbose_name="Facebook URL")
+    instagram_url = models.URLField(blank=True, verbose_name="Instagram URL")
+    twitter_url = models.URLField(blank=True, verbose_name="Twitter/X URL")
+    
+    # SEO
+    meta_description = models.TextField(blank=True, verbose_name="Descripción del Sitio (SEO)", help_text="Breve descripción para buscadores")
+    
+    # Anuncios
+    show_announcement = models.BooleanField(default=False, verbose_name="Mostrar Anuncio")
+    announcement_text = models.CharField(max_length=200, blank=True, verbose_name="Texto del Anuncio")
+
+    class Meta:
+        verbose_name = "Configuración del Sitio"
+        verbose_name_plural = "Configuración del Sitio"
+
+    def __str__(self):
+        return "Configuración del Sitio"
+
+    def save(self, *args, **kwargs):
+        # Ensure only one instance exists (Singleton pattern)
+        if not self.pk and SiteConfiguration.objects.exists():
+            self.pk = SiteConfiguration.objects.first().pk
+        super(SiteConfiguration, self).save(*args, **kwargs)
+
+    @classmethod
+    def get_solo(cls):
+        obj, created = cls.objects.get_or_create(pk=1)
+        return obj
+
+

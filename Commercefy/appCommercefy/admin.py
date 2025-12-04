@@ -15,7 +15,8 @@ from .models import (
     UserCoupon,
     MarketingTemplate,
     MarketingCampaign,
-    CampaignLog
+    CampaignLog,
+    SiteConfiguration
 )
 
 
@@ -135,4 +136,16 @@ class MarketingCampaignAdmin(admin.ModelAdmin):
     send_campaign_action.short_description = "Enviar Campañas Seleccionadas"
 
 admin.site.register(CampaignLog)
+
+
+@admin.register(SiteConfiguration)
+class SiteConfigurationAdmin(admin.ModelAdmin):
+    def has_add_permission(self, request):
+        # Only allow adding if no instance exists
+        return not SiteConfiguration.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        # Disallow deleting the configuration
+        return False
+
 

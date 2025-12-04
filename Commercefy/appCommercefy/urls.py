@@ -67,4 +67,6 @@ urlpatterns = [
     path('marketing/editor/<int:template_id>/', views.marketing_editor, name='marketing_editor'),
     path('marketing/save/<int:template_id>/', views.save_marketing_template, name='save_marketing_template'),
     path('marketing/campaign/create/', views.create_campaign, name='create_campaign'),
+    # Configuración
+    path('configuration/', views.site_configuration_view, name='site_configuration'),
 ]
